@@ -149,7 +149,7 @@ def PCjackknife(i,d1blocks,d2blocks,r2blocks,pimax,bins,estimator,r1blocks=None)
 
 def _BASS_block(cat,m):
 
-	if cat==None:
+	if cat is None:
 		return 0
 	blocks=[]
 	lens=[]
