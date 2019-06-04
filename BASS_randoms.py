@@ -43,14 +43,14 @@ def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,plo
 		lr_arr = ran_galcoords.l.value
 		br_arr = ran_galcoords.b.value
 	
-	temp = zip(zr_arr,rar_arr,decr_arr,lr_arr,br_arr)
+	temp = list(zip(zr_arr,rar_arr,decr_arr,lr_arr,br_arr))
 	rcat = np.zeros((len(zr_arr),), dtype=[('z', '<f8'),('ra', '<f8'),('dec', '<f8'),('l', '<f8'),\
 									   ('b', '<f8')])
 	rcat[:] = temp
 	
 	if use_BASS_sens_map is True:
 		if 'flux' not in data.dtype.names:
-			print 'no flux data in catalog found to filter based on sensitivity'
+			print('no flux data in catalog found to filter based on sensitivity')
 		else: 
 			rcat = BASS_sensitivity_filter(data,rcat)
 
@@ -59,7 +59,7 @@ def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,plo
 	randoms = append_fields(randoms, 'cdist', rcdists)
 	randoms=np.array(randoms)
 	
-	print 'number of randoms:', len(randoms)
+	print('number of randoms:', len(randoms))
 
 	if plot:
 		plot_zdist(data,randoms,z_grid,kdepdfz,plot_filename)
@@ -94,7 +94,7 @@ def BASS_sensitivity_filter(data,rcat):
 		try:
 			sensitivity = sens_map[px,py]*2.39e-8*4.8 #in ergs/s/cm^-2
 		except IndexError:
-			print l,b
+			print(l,b)
 		if flux>sensitivity:
 			good = np.append(good,i)
 	randoms=rcat[good.astype(int)]
@@ -105,7 +105,7 @@ def BASS_sensitivity_filter(data,rcat):
 def get_BASSsmap():
 	'''Enter Galactic coordinates'''
 	from astropy.wcs import WCS
-	direc = '/Users/mcp74/Dropbox/clustering/bass/sensitivity_maps/'
+	direc = '/Users/meredithpowell/Dropbox/clustering/bass/sensitivity_maps/'
 	w0 = WCS(direc + 'swiftbat_bkgstd_70month4_c0_tot_crab.fits')
 	w1 = WCS(direc + 'swiftbat_bkgstd_70month4_c1_tot_crab.fits')
 	w2 = WCS(direc + 'swiftbat_bkgstd_70month4_c2_tot_crab.fits')
@@ -170,11 +170,11 @@ def generate_rand_from_pdf(pdf, num, x_grid):
 def plot_zdist(data,randoms,z_grid,kdepdf,filename=None):
 	nd = len(data)
 	nr = len(randoms)
-	plt.hist(data['z'], histtype='stepfilled', bins=20,alpha=0.2,color='k',normed=True,label='data \n N='+str(nd))
-	plt.hist(randoms['z'], histtype='step', bins=20,alpha=0.5,normed=True,label='randoms\n N='+str(nr))
+	plt.hist(data['z'], histtype='stepfilled', bins=20,alpha=0.2,color='k',density=True,label='data \n N='+str(nd))
+	plt.hist(randoms['z'], histtype='step', bins=20,alpha=0.5,density=True,label='randoms\n N='+str(nr))
 	plt.plot(z_grid, kdepdf, color='g', alpha=0.5, lw=3,label='smoothed PDF')
-	plt.xlabel('z')
-	plt.legend(loc='best', frameon=False)
+	plt.xlabel('z',fontsize=14)
+	plt.legend(loc='best', frameon=False,fontsize=14)
 	plt.tight_layout()
 	if filename:
 		plt.savefig(filename)
