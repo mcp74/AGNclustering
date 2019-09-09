@@ -7,7 +7,7 @@ from astropy import units as u
 import sys
 from scipy import interpolate
 
-path = '/Users/meredithpowell/Dropbox/clustering/XXL/'
+path = '~/Dropbox/Projects/clustering/XXL/'
 #fluxarea=np.genfromtxt(path+'XMM_XXL_tot_af_0.5-10keV.txt', delimiter=',')
 
 

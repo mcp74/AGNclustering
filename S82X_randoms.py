@@ -13,7 +13,7 @@ from scipy import interpolate
 
 from clustering.utils import *
 
-direc = '/Users/meredithpowell/Dropbox/clustering/stripe82x/'
+direc = '~/Dropbox/clustering/Projects/stripe82x/'
 
 def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,plot=True,plot_filename=None,field='AO13'):
 	'''

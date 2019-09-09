@@ -7,7 +7,7 @@ from astropy import units as u
 import sys
 from scipy import interpolate
 
-path = '/Users/meredithpowell/Dropbox/clustering/stripe82x/'
+path = '~/Dropbox/clustering/Projects/stripe82x/'
 
 #s82area=31.288699999999999
 s82area=20.21

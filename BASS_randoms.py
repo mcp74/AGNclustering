@@ -105,7 +105,7 @@ def BASS_sensitivity_filter(data,rcat):
 def get_BASSsmap():
 	'''Enter Galactic coordinates'''
 	from astropy.wcs import WCS
-	direc = '/Users/meredithpowell/Dropbox/clustering/bass/sensitivity_maps/'
+	direc = '~/Dropbox/Projects/clustering/bass/sensitivity_maps/'
 	w0 = WCS(direc + 'swiftbat_bkgstd_70month4_c0_tot_crab.fits')
 	w1 = WCS(direc + 'swiftbat_bkgstd_70month4_c1_tot_crab.fits')
 	w2 = WCS(direc + 'swiftbat_bkgstd_70month4_c2_tot_crab.fits')

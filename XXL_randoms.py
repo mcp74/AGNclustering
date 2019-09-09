@@ -15,7 +15,7 @@ from astropy.wcs import WCS
 from clustering.utils import *
 from clustering.XMM_XXL_utils import *
 
-direc = '/Users/meredithpowell/Dropbox/clustering/XXL/'
+direc = '~/Dropbox/Projects/clustering/XXL/'
 
 def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,plot=True,plot_filename=None):
 	'''
