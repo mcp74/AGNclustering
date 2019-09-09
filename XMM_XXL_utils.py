@@ -6,8 +6,10 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 import sys
 from scipy import interpolate
+from os.path import expanduser
 
-path = '~/Dropbox/Projects/clustering/XXL/'
+home = expanduser("~")
+path = home+'/Dropbox/Data/XMM-XXL/'
 #fluxarea=np.genfromtxt(path+'XMM_XXL_tot_af_0.5-10keV.txt', delimiter=',')
 
 

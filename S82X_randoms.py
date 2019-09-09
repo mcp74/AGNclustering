@@ -8,12 +8,14 @@ from numpy.lib.recfunctions import append_fields
 from astropy import units as u
 from astropy.io import fits
 from astropy.coordinates import SkyCoord, match_coordinates_sky
-from kde import weighted_gaussian_kde
+from clustering.kde import weighted_gaussian_kde
 from scipy import interpolate
+from os.path import expanduser
 
 from clustering.utils import *
 
-direc = '~/Dropbox/clustering/Projects/stripe82x/'
+home = expanduser("~")
+direc = home+'/Dropbox/Data/stripe82x/'
 
 def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,plot=True,plot_filename=None,field='AO13'):
 	'''

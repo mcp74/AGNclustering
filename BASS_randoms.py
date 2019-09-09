@@ -8,6 +8,7 @@ from numpy.lib.recfunctions import append_fields
 from astropy import units as u
 from astropy.io import fits
 from astropy.coordinates import SkyCoord, match_coordinates_sky
+from os.path import expanduser
 
 from kde import weighted_gaussian_kde
 
@@ -105,7 +106,8 @@ def BASS_sensitivity_filter(data,rcat):
 def get_BASSsmap():
 	'''Enter Galactic coordinates'''
 	from astropy.wcs import WCS
-	direc = '~/Dropbox/Projects/clustering/bass/sensitivity_maps/'
+	home = expanduser("~")
+	direc = home+'/Dropbox/Data/BASS/sensitivity_maps/'
 	w0 = WCS(direc + 'swiftbat_bkgstd_70month4_c0_tot_crab.fits')
 	w1 = WCS(direc + 'swiftbat_bkgstd_70month4_c1_tot_crab.fits')
 	w2 = WCS(direc + 'swiftbat_bkgstd_70month4_c2_tot_crab.fits')

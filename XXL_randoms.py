@@ -8,14 +8,16 @@ from numpy.lib.recfunctions import append_fields
 from astropy import units as u
 from astropy.io import fits
 from astropy.coordinates import SkyCoord, match_coordinates_sky
-from kde import weighted_gaussian_kde
+from clustering.kde import weighted_gaussian_kde
 from scipy import interpolate
 from astropy.wcs import WCS
+from os.path import expanduser
 
 from clustering.utils import *
 from clustering.XMM_XXL_utils import *
 
-direc = '~/Dropbox/Projects/clustering/XXL/'
+home = expanduser("~")
+direc = home+'/Dropbox/Data/XMM-XXL/'
 
 def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,plot=True,plot_filename=None):
 	'''

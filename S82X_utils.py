@@ -6,8 +6,10 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 import sys
 from scipy import interpolate
+from os.path import expanduser
 
-path = '~/Dropbox/clustering/Projects/stripe82x/'
+home = expanduser("~")
+path = home+'/Dropbox/Data/stripe82x/'
 
 #s82area=31.288699999999999
 s82area=20.21
