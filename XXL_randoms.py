@@ -16,8 +16,6 @@ from os.path import expanduser
 from clustering.utils import *
 from clustering.XMM_XXL_utils import *
 
-home = expanduser("~")
-direc = home+'/Dropbox/Data/XMM-XXL/'
 
 def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/meredithpowell/Dropbox/Data/XMM-XXL/',plot=True,plot_filename=None):
 	'''
@@ -76,7 +74,7 @@ def XXL_sensitivity_filter(path,rcat):
 	#fn = get_lognlogs()
 
 	#assign flux from data distribution
-	t = Table.read(direc+'catalogs/xxl_xz-matched.fits')
+	t = Table.read(path+'catalogs/xxl_xz-matched.fits')
 	xxldat = np.array(t)
 	f_arr = np.log10(xxldat['flux_full'][xxldat['flux_full']>0])
 	f_grid = np.linspace(min(f_arr), max(f_arr), 1000)
