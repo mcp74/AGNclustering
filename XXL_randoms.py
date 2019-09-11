@@ -19,7 +19,7 @@ from clustering.XMM_XXL_utils import *
 home = expanduser("~")
 direc = home+'/Dropbox/Data/XMM-XXL/'
 
-def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/meredithpowell/Dropbox/Data/XMM-XXL',plot=True,plot_filename=None):
+def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/meredithpowell/Dropbox/Data/XMM-XXL/',plot=True,plot_filename=None):
 	'''
 	generates random catalog with random sky distribution and redshift
 	To filter based on the BASS sensitivity map, set 'use_BASS_sens_map' to True
