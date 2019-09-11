@@ -13,13 +13,13 @@ path = home+'/Dropbox/Data/XMM-XXL/'
 #fluxarea=np.genfromtxt(path+'XMM_XXL_tot_af_0.5-10keV.txt', delimiter=',')
 
 
-def parse(band):
+def get_flux_f(data_path,band):
     if band=='full':
         #fluxarea=np.genfromtxt(path+'FvA_0.5-10keV.csv',delimiter=',')
-        fluxarea=np.genfromtxt(path+'flux_area/N_full_40.curve')
+        fluxarea=np.genfromtxt(data_path+'flux_area/N_full_40.curve')
     elif band=='hard':
         #fluxarea=np.genfromtxt(path+'FvA_2-10keV.csv',delimiter=',')
-        fluxarea=np.genfromtxt(path+'flux_area/N_hard_40.curve')
+        fluxarea=np.genfromtxt(data_path+'flux_area/N_hard_40.curve')
     F = -fluxarea[:,1]
     A = fluxarea[:,4]
     #F = fluxarea[:,0]
@@ -27,8 +27,9 @@ def parse(band):
     fn = interpolate.interp1d(F,A)
     return fn
 
-def area(flux,fn):
+def area(data_path,band,flux):
     lflux = np.log10(flux)
+    fn = get_flux_f(data_path,band)
     if lflux > -12.1:
         return fn(-12)
     elif lflux < -15:
@@ -36,14 +37,14 @@ def area(flux,fn):
     else:
         return fn(lflux)
 
-def include_area_weights(cat,band='full'):
+def include_area_weights(data_path,cat,band='full'):
     p_arr=[]
     if band=='full':
         flux=cat['flux_full']
-        fn = parse('full')
+        fn = get_flux_f(data_path,'full')
     elif band=='hard':
         flux=cat['flux_hard']
-        fn = parse('hard')
+        fn = get_flux_f(data_path,'hard')
     Xarea=fn(-12)
     for f in flux:
         p = area(f,fn)/Xarea

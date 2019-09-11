@@ -6,54 +6,60 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 import sys
 from scipy import interpolate
-from os.path import expanduser
-
-home = expanduser("~")
-path = home+'/Dropbox/Data/stripe82x/'
-
-#s82area=31.288699999999999
-s82area=20.21
-
-fluxareaf=np.genfromtxt(path+'flux-area/xmm_ao10_ao13_af_0.5-10keV.txt')
-Ff = fluxareaf[:,0]
-Af = fluxareaf[:,1]
-ff = interpolate.interp1d(Ff,Af)
-
-fluxareah=np.genfromtxt(path+'flux-area/xmm_ao10_ao13_af_2-10keV.txt')
-Fh = fluxareah[:,0]
-Ah = fluxareah[:,1]
-fh = interpolate.interp1d(Fh,Ah)
+from pathlib import Path
 
 
-def area_hard(log_flux):
+def get_flux_f(data_path,waveband='full'):
+    s82area=20.21
+
+    if waveband=='full':
+        fluxareaf=np.genfromtxt(data_path+'flux-area/xmm_ao10_ao13_af_0.5-10keV.txt')
+        F = fluxareaf[:,0]
+        A = fluxareaf[:,1]
+        f = interpolate.interp1d(Ff,Af)
+
+    if waveband=='hard':
+        fluxareaf=np.genfromtxt(data_path+'flux-area/xmm_ao10_ao13_af_2-10keV.txt')
+        F = fluxareaf[:,0]
+        A = fluxareaf[:,1]
+        f = interpolate.interp1d(Ff,Af)
+
+    else: f=None
+    return f
+
+
+
+def area_hard(data_path,log_flux):
     if log_flux>-13.2:
         return s82area
     elif log_flux<-13.85:
         return 1e-2
     else:
+        fh = get_flux_f(data_path,waveband='hard')
         return fh(log_flux)
 
-def area_full(log_flux):
+def area_full(data_path,log_flux):
     if log_flux>-13.3:
         return s82area
     elif log_flux<-14.78:
         return 1e-2
     else:
+        ff = get_flux_f(data_path,waveband='full')
         return ff(log_flux)
 
-def include_area_weights(cat,band):
+def include_area_weights(data_path,cat,band):
     p_arr=[]
     if band=='full':
         flux=cat['flux_full']
         fn = area_full
         for f in flux:
-            p = area_full(np.log10(f))/s82area
+            p = area_full(data_path,np.log10(f))/s82area
             p_arr.append(1./p)
     elif band=='hard':
         flux=cat['flux_hard']
         fn = area_hard
         for f in flux:
-            p = area_hard(np.log10(f))/s82area
+            p = area_hard(data_path,np.log10(f))/s82area
             p_arr.append(1./p)
     #for f in cat['flux']:
     #    p = area(np.log10(f))/s82area

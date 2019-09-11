@@ -19,7 +19,7 @@ from clustering.XMM_XXL_utils import *
 home = expanduser("~")
 direc = home+'/Dropbox/Data/XMM-XXL/'
 
-def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,plot=True,plot_filename=None):
+def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/meredithpowell/Dropbox/Data/XMM-XXL',plot=True,plot_filename=None):
 	'''
 	generates random catalog with random sky distribution and redshift
 	To filter based on the BASS sensitivity map, set 'use_BASS_sens_map' to True
@@ -54,7 +54,7 @@ def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,plot=True,plot_filename
 	rcat = np.zeros((len(zr_arr),), dtype=[('z', '<f8'),('ra', '<f8'),('dec', '<f8')])
 	rcat[:] = temp
 	
-	rcat = XXL_sensitivity_filter(rcat)
+	rcat = XXL_sensitivity_filter(data_path,rcat)
 
 	randoms=rcat[rcat['flux']>1e-14]
 	rcdists = np.array([cosmo.comoving_distance(z).value for z in randoms['z']])*cosmo.h
@@ -68,7 +68,7 @@ def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,plot=True,plot_filename
 
 	return randoms
 
-def XXL_sensitivity_filter(rcat):
+def XXL_sensitivity_filter(path,rcat):
 
 	n_rand = len(rcat)
 
@@ -88,9 +88,9 @@ def XXL_sensitivity_filter(rcat):
 	#rcat = append_fields(rcat, 'flux', fluxr_arr)
 	
 	#filter based on sensitivity
-	smap,wcss = get_XXLsmap()
-	bmap,wcsb = get_XXLbmap()
-	emap,wcse = get_XXLemap()
+	smap,wcss = get_XXLsmap(path)
+	bmap,wcsb = get_XXLbmap(path)
+	emap,wcse = get_XXLemap(path)
 	good=[]
 	for i,r in enumerate(rcat):
 		ra=r['ra']
@@ -121,25 +121,25 @@ def XXL_sensitivity_filter(rcat):
 	return randoms
 
 
-def get_XXLsmap():
-	w0 = WCS(direc + 'sensitivity_maps/full_sense.fits')
-	h0 = fits.open(direc + 'sensitivity_maps/full_sense.fits')
+def get_XXLsmap(path):
+	w0 = WCS(path + 'sensitivity_maps/full_sense.fits')
+	h0 = fits.open(path + 'sensitivity_maps/full_sense.fits')
 	s0 = h0[0].data
 	smap = s0
 	wcs = w0
 	return smap,wcs
 
-def get_XXLbmap():
-	w0 = WCS(direc + 'sensitivity_maps/full_bkgeef.fits')
-	h0 = fits.open(direc + 'sensitivity_maps/full_bkgeef.fits')
+def get_XXLbmap(path):
+	w0 = WCS(path + 'sensitivity_maps/full_bkgeef.fits')
+	h0 = fits.open(path + 'sensitivity_maps/full_bkgeef.fits')
 	s0 = h0[0].data
 	bmap = s0
 	wcs = w0
 	return bmap,wcs
 
-def get_XXLemap():
-	w0 = WCS(direc + 'sensitivity_maps/full_expeef.fits')
-	h0 = fits.open(direc + 'sensitivity_maps/full_expeef.fits')
+def get_XXLemap(path):
+	w0 = WCS(path + 'sensitivity_maps/full_expeef.fits')
+	h0 = fits.open(path + 'sensitivity_maps/full_expeef.fits')
 	s0 = h0[0].data
 	emap = s0
 	wcs = w0

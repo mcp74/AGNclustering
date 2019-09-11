@@ -14,10 +14,8 @@ from os.path import expanduser
 
 from clustering.utils import *
 
-home = expanduser("~")
-direc = home+'/Dropbox/Data/stripe82x/'
 
-def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,plot=True,plot_filename=None,field='AO13'):
+def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/meredithpowell/Dropbox/Data/stripe82x/',plot=True,plot_filename=None,field='AO13'):
 	'''
 	generates random catalog with random sky distribution and redshift
 	To filter based on the BASS sensitivity map, set 'use_BASS_sens_map' to True
@@ -71,7 +69,7 @@ def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,plot=True,plot_filename
 		#if 'flux' not in data.dtype.names:
 		#	print('no flux data in catalog found to filter based on sensitivity')
 		#else: 
-		rcat = S82X_sensitivity_filter(data,rcat,field)
+		rcat = S82X_sensitivity_filter(data,data_path,rcat,field)
 
 	#randoms=rcat
 	randoms=rcat[rcat['flux']>1e-14]
@@ -86,10 +84,10 @@ def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,plot=True,plot_filename
 
 	return randoms
 
-def S82X_sensitivity_filter(data,rcat,field):
+def S82X_sensitivity_filter(data,path,rcat,field):
 
 	#flux_arr = data['flux']
-	t = Table.read(direc+'catalogs/S82X_catalog_with_photozs_unique_Xraysrcs_likely_cps.fits')
+	t = Table.read(path+'catalogs/S82X_catalog_with_photozs_unique_Xraysrcs_likely_cps.fits')
 	s82cat = np.array(t)
 	flux_arr = s82cat['FULL_FLUX'][s82cat['FULL_FLUX']>0]
 	n_rand = len(rcat)
@@ -108,7 +106,7 @@ def S82X_sensitivity_filter(data,rcat,field):
 	rcat = append_fields(rcat, 'flux', fluxr_arr)
 	
 	#filter based on sensitivity
-	smap,wcs0 = get_S82Xsmap(field)
+	smap,wcs0 = get_S82Xsmap(path,field)
 	good=[]
 	for i,r in enumerate(rcat):
 		ra=r['ra']
@@ -127,35 +125,35 @@ def S82X_sensitivity_filter(data,rcat,field):
 	
 	return randoms
 
-def get_lognlogs():
-	cat=np.genfromtxt(direc + 'lognlogs/s82_xmm_logn_logs0.5-10keV.txt')
+def get_lognlogs(path):
+	cat=np.genfromtxt(path + 'lognlogs/s82_xmm_logn_logs0.5-10keV.txt')
 	S = cat[:,0]
 	N = cat[:,1]
 	fN = interpolate.interp1d(np.log10(S),N)
 	return fN
 
-def get_S82Xsmap(field):
+def get_S82Xsmap(path,field):
 	'''Enter Galactic coordinates'''
 	from astropy.wcs import WCS
 	if field=='AO13':
 		#w0 = WCS(direc + 'exp_maps/ao13_bgmsk_expmap/Full/s82_0.5-10_sig5.1_corr.fits')
 		#h0 = fits.open(direc + 'exp_maps/ao13_bgmsk_expmap/Full/s82_0.5-10_sig5.1_corr.fits')
-		w0 = WCS(direc + 'exp_maps/ao13_bgmsk_expmap/Full/s82x_0.5-10_sig5.1_newtest8_r30.fits')
-		h0 = fits.open(direc + 'exp_maps/ao13_bgmsk_expmap/Full/s82x_0.5-10_sig5.1_newtest8_r30.fits')
+		w0 = WCS(path + 'exp_maps/ao13_bgmsk_expmap/Full/s82x_0.5-10_sig5.1_newtest8_r30.fits')
+		h0 = fits.open(path + 'exp_maps/ao13_bgmsk_expmap/Full/s82x_0.5-10_sig5.1_newtest8_r30.fits')
 		s0 = h0[0].data
 	elif field=='AO10_1':
 		#w0 = WCS(direc + 'exp_maps/ao10_bgmsk_expmap/1ao10_0.5-10keV_sig5.1_corr.fits')
 		#h0 = fits.open(direc + 'exp_maps/ao10_bgmsk_expmap/1ao10_0.5-10keV_sig5.1_corr.fits')
 		#s0 = 0.17*h0[0].data
-		w0 = WCS(direc + 'exp_maps/ao10_bgmsk_expmap/1ao10_0.5-10keV_sig5.1_corr_newtest8_r30.fits')
-		h0 = fits.open(direc + 'exp_maps/ao10_bgmsk_expmap/1ao10_0.5-10keV_sig5.1_corr_newtest8_r30.fits')
+		w0 = WCS(path + 'exp_maps/ao10_bgmsk_expmap/1ao10_0.5-10keV_sig5.1_corr_newtest8_r30.fits')
+		h0 = fits.open(path + 'exp_maps/ao10_bgmsk_expmap/1ao10_0.5-10keV_sig5.1_corr_newtest8_r30.fits')
 		s0 = h0[0].data
 	elif field=='AO10_2':
 		#w0 = WCS(direc + 'exp_maps/ao10_bgmsk_expmap/2ao10_0.5-10keV_sig5.1_corr.fits')
 		#h0 = fits.open(direc + 'exp_maps/ao10_bgmsk_expmap/2ao10_0.5-10keV_sig5.1_corr.fits')
 		#s0 = 0.17*h0[0].data
-		w0 = WCS(direc + 'exp_maps/ao10_bgmsk_expmap/2ao10_0.5-10keV_sig5.1_corr_newtest8_r30.fits')
-		h0 = fits.open(direc + 'exp_maps/ao10_bgmsk_expmap/2ao10_0.5-10keV_sig5.1_corr_newtest8_r30.fits')
+		w0 = WCS(path + 'exp_maps/ao10_bgmsk_expmap/2ao10_0.5-10keV_sig5.1_corr_newtest8_r30.fits')
+		h0 = fits.open(path + 'exp_maps/ao10_bgmsk_expmap/2ao10_0.5-10keV_sig5.1_corr_newtest8_r30.fits')
 		s0 = h0[0].data
 	smap = s0
 	wcs = w0

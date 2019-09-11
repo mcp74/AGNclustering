@@ -14,7 +14,7 @@ from kde import weighted_gaussian_kde
 
 
 
-def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,plot=True,plot_filename=None):
+def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,data_path='/Users/meredithpowell/Dropbox/Data/BASS/sensitivity_maps/',plot=True,plot_filename=None):
 	'''
 	generates random catalog with random sky distribution and redshift
 	To filter based on the BASS sensitivity map, set 'use_BASS_sens_map' to True
@@ -53,7 +53,7 @@ def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,plo
 		if 'flux' not in data.dtype.names:
 			print('no flux data in catalog found to filter based on sensitivity')
 		else: 
-			rcat = BASS_sensitivity_filter(data,rcat)
+			rcat = BASS_sensitivity_filter(data_path,data,rcat)
 
 	randoms=rcat
 	rcdists = np.array([cosmo.comoving_distance(z).value for z in randoms['z']])*cosmo.h
@@ -68,7 +68,7 @@ def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,plo
 	return randoms
 
 
-def BASS_sensitivity_filter(data,rcat):
+def BASS_sensitivity_filter(path,data,rcat):
 
 	flux_arr = data['flux']
 	n_rand = len(rcat)
@@ -82,7 +82,7 @@ def BASS_sensitivity_filter(data,rcat):
 
 	rcat = append_fields(rcat, 'flux', fluxr_arr)
 
-	smaps,wcses=get_BASSsmap()
+	smaps,wcses=get_BASSsmap(path)
 	
 	#filter based on sensitivity
 	good=[]
@@ -103,11 +103,9 @@ def BASS_sensitivity_filter(data,rcat):
 	return randoms
 
 
-def get_BASSsmap():
+def get_BASSsmap(direc):
 	'''Enter Galactic coordinates'''
 	from astropy.wcs import WCS
-	home = expanduser("~")
-	direc = home+'/Dropbox/Data/BASS/sensitivity_maps/'
 	w0 = WCS(direc + 'swiftbat_bkgstd_70month4_c0_tot_crab.fits')
 	w1 = WCS(direc + 'swiftbat_bkgstd_70month4_c1_tot_crab.fits')
 	w2 = WCS(direc + 'swiftbat_bkgstd_70month4_c2_tot_crab.fits')
