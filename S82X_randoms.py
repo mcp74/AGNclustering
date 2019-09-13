@@ -15,7 +15,7 @@ from os.path import expanduser
 from clustering.utils import *
 
 
-def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/meredithpowell/Dropbox/Data/stripe82x/',plot=True,plot_filename=None,field='AO13'):
+def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/meredithpowell/Dropbox/Data/stripe82x/',plot=True,plot_filename=None,field='AO13',use_lognlogs=True):
 	'''
 	generates random catalog with random sky distribution and redshift
 	To filter based on the BASS sensitivity map, set 'use_BASS_sens_map' to True
@@ -32,7 +32,11 @@ def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/mered
 	
 	#generate random redshifts
 	if use_S82X_sens_map is True:
-		n_rand = int(round(n*ndata*1.8))
+		if use_lognlogs==True:
+			n_rand = int(round(n*ndata*16))
+		else:
+			n_rand = int(round(n*ndata*1.8))
+
 	else: n_rand = int(round(n*ndata))
 	z_grid = np.linspace(min(z_arr), max(z_arr), 1000)
 	kde = weighted_gaussian_kde(z_arr, bw_method=width, weights=weights)
@@ -69,7 +73,7 @@ def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/mered
 		#if 'flux' not in data.dtype.names:
 		#	print('no flux data in catalog found to filter based on sensitivity')
 		#else: 
-		rcat = S82X_sensitivity_filter(data,data_path,rcat,field)
+		rcat = S82X_sensitivity_filter(data,data_path,rcat,field,use_lognlogs)
 
 	#randoms=rcat
 	randoms=rcat[rcat['flux']>1e-14]
@@ -84,7 +88,7 @@ def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/mered
 
 	return randoms
 
-def S82X_sensitivity_filter(data,path,rcat,field):
+def S82X_sensitivity_filter(data,path,rcat,field,use_lognlogs=True):
 
 	#flux_arr = data['flux']
 	t = Table.read(path+'catalogs/S82X_catalog_with_photozs_unique_Xraysrcs_likely_cps.fits')
@@ -92,19 +96,25 @@ def S82X_sensitivity_filter(data,path,rcat,field):
 	flux_arr = s82cat['FULL_FLUX'][s82cat['FULL_FLUX']>0]
 	n_rand = len(rcat)
 
-	#get logN-logS distribution:
-	#fn = get_lognlogs()
 	
 	#generate random fluxes
+
 	log_flux_grid = np.linspace(min(np.log10(flux_arr)), max(np.log10(flux_arr)), 1000)
-	#fpdf = fn(log_flux_grid)/np.sum(fn(log_flux_grid))
-	kde = weighted_gaussian_kde(np.log10(flux_arr), bw_method=0.1)
-	fpdf=kde.evaluate(log_flux_grid)
+
+	if use_lognlogs==True:
+		lognlogs=get_lognlogs(path)
+		fpdf = lognlogs(log_flux_grid)/np.sum(lognlogs(log_flux_grid))		
+
+	else:
+		kde = weighted_gaussian_kde(np.log10(flux_arr), bw_method=0.1)
+		fpdf=kde.evaluate(log_flux_grid)
+
 	log_rflux_arr = generate_rand_from_pdf(pdf=fpdf, num=n_rand, x_grid=log_flux_grid)
 	fluxr_arr = 10**(log_rflux_arr)
 
 	rcat = append_fields(rcat, 'flux', fluxr_arr)
 	
+
 	#filter based on sensitivity
 	smap,wcs0 = get_S82Xsmap(path,field)
 	good=[]
@@ -117,9 +127,9 @@ def S82X_sensitivity_filter(data,path,rcat,field):
 		px = np.round(px).astype(int)
 		py = np.round(py).astype(int)
 		sensitivity = smap[px,py]*10**-11
-		#sensitivity map is a bit off for unknown reasons!! Fudge factor is used so that the data/random distributions match more closely
+		#sensitivity map is a bit off for unknown reasons!! Fudge factor is used so that the data/random flux distributions match more closely
 		#if (flux>.37*sensitivity) and (sensitivity>0):
-		if (flux>sensitivity) and (sensitivity>0):
+		if (flux>1.5*sensitivity) and (sensitivity>0):
 			good = np.append(good,i)
 	randoms=rcat[good.astype(int)]
 	
@@ -129,7 +139,9 @@ def get_lognlogs(path):
 	cat=np.genfromtxt(path + 'lognlogs/s82_xmm_logn_logs0.5-10keV.txt')
 	S = cat[:,0]
 	N = cat[:,1]
-	fN = interpolate.interp1d(np.log10(S),N)
+	Snew = np.append(1.6e-15,S)
+	Nnew = np.append(1100,N)
+	fN = interpolate.interp1d(np.log10(Snew),Nnew)
 	return fN
 
 def get_S82Xsmap(path,field):
