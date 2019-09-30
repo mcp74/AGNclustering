@@ -129,7 +129,8 @@ def S82X_sensitivity_filter(data,path,rcat,field,use_lognlogs=True):
 		sensitivity = smap[px,py]*10**-11
 		#sensitivity map is a bit off for unknown reasons!! Fudge factor is used so that the data/random flux distributions match more closely
 		#if (flux>.37*sensitivity) and (sensitivity>0):
-		if (flux>1.5*sensitivity) and (sensitivity>0):
+		#if (flux>1.5*sensitivity) and (sensitivity>0):
+		if (flux>sensitivity) and (sensitivity>0):
 			good = np.append(good,i)
 	randoms=rcat[good.astype(int)]
 	
@@ -150,22 +151,22 @@ def get_S82Xsmap(path,field):
 	if field=='AO13':
 		#w0 = WCS(direc + 'exp_maps/ao13_bgmsk_expmap/Full/s82_0.5-10_sig5.1_corr.fits')
 		#h0 = fits.open(direc + 'exp_maps/ao13_bgmsk_expmap/Full/s82_0.5-10_sig5.1_corr.fits')
-		w0 = WCS(path + 'exp_maps/ao13_bgmsk_expmap/Full/s82x_0.5-10_sig5.1_newtest8_r30.fits')
-		h0 = fits.open(path + 'exp_maps/ao13_bgmsk_expmap/Full/s82x_0.5-10_sig5.1_newtest8_r30.fits')
+		w0 = WCS(path + 'exp_maps/ao13_bgmsk_expmap/Full/s82x_0.5-10_sig5.1_newtest8.fits')
+		h0 = fits.open(path + 'exp_maps/ao13_bgmsk_expmap/Full/s82x_0.5-10_sig5.1_newtest8.fits')
 		s0 = h0[0].data
 	elif field=='AO10_1':
 		#w0 = WCS(direc + 'exp_maps/ao10_bgmsk_expmap/1ao10_0.5-10keV_sig5.1_corr.fits')
 		#h0 = fits.open(direc + 'exp_maps/ao10_bgmsk_expmap/1ao10_0.5-10keV_sig5.1_corr.fits')
 		#s0 = 0.17*h0[0].data
-		w0 = WCS(path + 'exp_maps/ao10_bgmsk_expmap/1ao10_0.5-10keV_sig5.1_corr_newtest8_r30.fits')
-		h0 = fits.open(path + 'exp_maps/ao10_bgmsk_expmap/1ao10_0.5-10keV_sig5.1_corr_newtest8_r30.fits')
+		w0 = WCS(path + 'exp_maps/ao10_bgmsk_expmap/1ao10_0.5-10keV_sig5.1_corr_newtest8.fits')
+		h0 = fits.open(path + 'exp_maps/ao10_bgmsk_expmap/1ao10_0.5-10keV_sig5.1_corr_newtest8.fits')
 		s0 = h0[0].data
 	elif field=='AO10_2':
 		#w0 = WCS(direc + 'exp_maps/ao10_bgmsk_expmap/2ao10_0.5-10keV_sig5.1_corr.fits')
 		#h0 = fits.open(direc + 'exp_maps/ao10_bgmsk_expmap/2ao10_0.5-10keV_sig5.1_corr.fits')
 		#s0 = 0.17*h0[0].data
-		w0 = WCS(path + 'exp_maps/ao10_bgmsk_expmap/2ao10_0.5-10keV_sig5.1_corr_newtest8_r30.fits')
-		h0 = fits.open(path + 'exp_maps/ao10_bgmsk_expmap/2ao10_0.5-10keV_sig5.1_corr_newtest8_r30.fits')
+		w0 = WCS(path + 'exp_maps/ao10_bgmsk_expmap/2ao10_0.5-10keV_sig5.1_corr_newtest8.fits')
+		h0 = fits.open(path + 'exp_maps/ao10_bgmsk_expmap/2ao10_0.5-10keV_sig5.1_corr_newtest8.fits')
 		s0 = h0[0].data
 	smap = s0
 	wcs = w0

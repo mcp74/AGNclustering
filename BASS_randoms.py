@@ -10,7 +10,7 @@ from astropy.io import fits
 from astropy.coordinates import SkyCoord, match_coordinates_sky
 from os.path import expanduser
 
-from kde import weighted_gaussian_kde
+from clustering.kde import weighted_gaussian_kde
 
 
 

@@ -82,7 +82,7 @@ def standardize(cat):
     new[:] = temp
     return new
 
-def parseS82X_pdfs(data, pdf_dir, prefix='Id', extension='spec', zfill=9):
+def parseS82X_pdfs(data, pdf_dir=None, prefix='Id', extension='spec', zfill=9):
     '''
     Input: data array with following column names:
     ra: 'CP_RA'
@@ -93,8 +93,6 @@ def parseS82X_pdfs(data, pdf_dir, prefix='Id', extension='spec', zfill=9):
 
     returns parsed array with z weights, array of PDFs
     '''
-    if pdf_dir is None:
-        sys.exit('Please specify directory for photo-z pdf files')
 
     w_arr=[]
     z_arr=[]
@@ -106,8 +104,12 @@ def parseS82X_pdfs(data, pdf_dir, prefix='Id', extension='spec', zfill=9):
     ztype=[]
     pdfs=[]
     skip=0
+
     for i,r in enumerate(data):
         if (r['SPEC_Z']<=0) and (r['PHOTO_Z']>0):
+            if pdf_dir is None:
+                sys.exit('Please specify directory for photo-z pdf files')
+
             fname = pdf_dir+prefix+str(r['REC_NO']).zfill(zfill)+'.'+extension
             try:
                 full_pdf = np.genfromtxt(fname,skip_header=32)[:651]

@@ -17,7 +17,7 @@ from clustering.utils import *
 from clustering.XMM_XXL_utils import *
 
 
-def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/meredithpowell/Dropbox/Data/XMM-XXL/',plot=True,plot_filename=None):
+def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/meredithpowell/Dropbox/Data/XMM-XXL/',plot=True,plot_filename=None,use_lognlogs=True):
 	'''
 	generates random catalog with random sky distribution and redshift
 	To filter based on the BASS sensitivity map, set 'use_BASS_sens_map' to True
@@ -66,18 +66,24 @@ def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/mered
 
 	return randoms
 
-def XXL_sensitivity_filter(path,rcat):
+def XXL_sensitivity_filter(path,rcat,use_lognlogs=True):
 
 	n_rand = len(rcat)
 
-	#get logN-logS distribution:
-	#fn = get_lognlogs()
-
-	#assign flux from data distribution
 	t = Table.read(path+'catalogs/xxl_xz-matched.fits')
 	xxldat = np.array(t)
+
 	f_arr = np.log10(xxldat['flux_full'][xxldat['flux_full']>0])
 	f_grid = np.linspace(min(f_arr), max(f_arr), 1000)
+
+	if use_lognlogs==True:
+		lognlogs=get_lognlogs(path)
+		fpdf = lognlogs(f_grid)/np.sum(lognlogs(f_grid))		
+
+	else:
+		kde = weighted_gaussian_kde(f_arr, bw_method=0.1)
+		fpdf=kde.evaluate(f_grid)
+
 	kde = weighted_gaussian_kde(f_arr, bw_method=0.1)
 	kdepdff=kde.evaluate(f_grid)
 	log_rflux_arr = generate_rand_from_pdf(pdf=kdepdff, num=n_rand, x_grid=f_grid)
@@ -118,6 +124,14 @@ def XXL_sensitivity_filter(path,rcat):
 	
 	return randoms
 
+def get_lognlogs(path):
+	cat=np.genfromtxt(path + 's82x_logNlogS/s82_xmm_logn_logs0.5-10keV.txt')
+	S = cat[:,0]
+	N = cat[:,1]
+	Snew = np.append(1.6e-15,S)
+	Nnew = np.append(1100,N)
+	fN = interpolate.interp1d(np.log10(Snew),Nnew)
+	return fN
 
 def get_XXLsmap(path):
 	w0 = WCS(path + 'sensitivity_maps/full_sense.fits')
