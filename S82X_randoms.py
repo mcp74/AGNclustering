@@ -33,7 +33,9 @@ def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/mered
 	#generate random redshifts
 	if use_S82X_sens_map is True:
 		if use_lognlogs==True:
-			n_rand = int(round(n*ndata*16))
+			n_rand = int(round(n*ndata*16.2))
+			#n_rand = int(round(n*ndata*11))
+			#n_rand = int(round(n*ndata*14))
 		else:
 			n_rand = int(round(n*ndata*1.8))
 
