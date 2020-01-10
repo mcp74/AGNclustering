@@ -54,7 +54,8 @@ def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/mered
 	
 	rcat = XXL_sensitivity_filter(data_path,rcat)
 
-	randoms=rcat[rcat['flux']>1e-14]
+	randoms=rcat
+	#randoms=rcat[rcat['flux']>1e-14]
 	rcdists = np.array([cosmo.comoving_distance(z).value for z in randoms['z']])*cosmo.h
 	randoms = append_fields(randoms, 'cdist', rcdists)
 	randoms=np.array(randoms)
