@@ -103,5 +103,5 @@ def Mh(b,z,cosmo=Planck15,bias_model='T10'):
 		f=interp1d(bias_T05(nu_arr),m_arr,kind='cubic')
 	elif bias_model=='S01':
 		f=interp1d(bias_S01(nu_arr),m_arr,kind='cubic')
-	return np.log10(f(b))
+	return np.log10(f(b)) 
 

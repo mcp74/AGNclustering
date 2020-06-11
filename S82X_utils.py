@@ -101,6 +101,7 @@ def parseS82X_pdfs(data, pdf_dir=None, prefix='Id', extension='spec', zfill=9):
     id_arr=[]
     Hflux_arr=[]
     Fflux_arr=[]
+    Sflux_arr=[]
     ztype=[]
     pdfs=[]
     skip=0
@@ -130,6 +131,7 @@ def parseS82X_pdfs(data, pdf_dir=None, prefix='Id', extension='spec', zfill=9):
             ident = r['REC_NO']*np.ones(len(p))
             Hflux = r['HARD_FLUX']*np.ones(len(p))
             Fflux = r['FULL_FLUX']*np.ones(len(p))
+            Sflux = r['SOFT_FLUX']*np.ones(len(p))
             phot = np.ones(len(p))
             w_arr=np.append(w_arr,p)
             z_arr=np.append(z_arr,z)
@@ -137,6 +139,7 @@ def parseS82X_pdfs(data, pdf_dir=None, prefix='Id', extension='spec', zfill=9):
             dec_arr=np.append(dec_arr,dec)
             Hflux_arr=np.append(Hflux_arr,Hflux)
             Fflux_arr=np.append(Fflux_arr,Fflux)
+            Sflux_arr=np.append(Sflux_arr,Sflux)
             id_arr=np.append(id_arr,ident)
             ztype=np.append(ztype,phot)
             pdfs.append([z,p])
@@ -148,11 +151,12 @@ def parseS82X_pdfs(data, pdf_dir=None, prefix='Id', extension='spec', zfill=9):
             id_arr=np.append(id_arr,r['REC_NO'])
             Hflux_arr=np.append(Hflux_arr,r['HARD_FLUX'])
             Fflux_arr=np.append(Fflux_arr,r['FULL_FLUX'])
+            Sflux_arr=np.append(Sflux_arr,r['SOFT_FLUX'])
             ztype=np.append(ztype,0)
             pdfs.append([np.array([r['SPEC_Z']]),np.array([1.])])
     print('Could not find '+str(skip)+' PDF files.')
-    temp = list(zip(ra_arr,dec_arr,z_arr,Hflux_arr,Fflux_arr,w_arr,id_arr,ztype))
-    parsed = np.zeros((len(ra_arr),), dtype=[('ra', '<f8'),('dec', '<f8'),('z', '<f8'),('flux_hard', '<f8'),('flux_full', '<f8'),('weight', '<f8'),('id', '<f8'),('ztype', '<i8')])
+    temp = list(zip(ra_arr,dec_arr,z_arr,Hflux_arr,Fflux_arr,Sflux_arr,w_arr,id_arr,ztype))
+    parsed = np.zeros((len(ra_arr),), dtype=[('ra', '<f8'),('dec', '<f8'),('z', '<f8'),('flux_hard', '<f8'),('flux_full', '<f8'),('flux_soft', '<f8'),('weight', '<f8'),('id', '<f8'),('ztype', '<i8')])
     parsed[:] = temp
 
     return parsed, np.array(pdfs)
