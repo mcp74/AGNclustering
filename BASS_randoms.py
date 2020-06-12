@@ -14,10 +14,11 @@ from clustering.kde import weighted_gaussian_kde
 
 
 
-def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,data_path='/Users/meredithpowell/Dropbox/Data/BASS/sensitivity_maps/',plot=True,plot_filename=None):
+def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,data_path='/Users/meredithpowell/Dropbox/Data/BASS/',plot=True,plot_filename=None):
 	'''
 	generates random catalog with random sky distribution and redshift
 	To filter based on the BASS sensitivity map, set 'use_BASS_sens_map' to True
+	Assumes BAT sensitivity maps are located in a 'sensitiviy_map' folder in the data path
 	
 	'''
 	z_arr = data['z']
@@ -53,7 +54,7 @@ def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,dat
 		if 'flux' not in data.dtype.names:
 			print('no flux data in catalog found to filter based on sensitivity')
 		else: 
-			rcat = BASS_sensitivity_filter(data_path,data,rcat)
+			rcat = BASS_sensitivity_filter(data_path + 'sensitivity_maps/',data,rcat)
 
 	randoms=rcat
 	rcdists = np.array([cosmo.comoving_distance(z).value for z in randoms['z']])*cosmo.h
