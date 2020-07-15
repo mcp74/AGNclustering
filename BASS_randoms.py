@@ -14,7 +14,7 @@ from clustering.kde import weighted_gaussian_kde
 
 
 
-def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,data_path='/Users/meredithpowell/Dropbox/Data/BASS/',plot=True,plot_filename=None):
+def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,data_path='/Users/meredithpowell/Dropbox/Data/BASS/',plot=True,plot_filename=None,survey=None):
 	'''
 	generates random catalog with random sky distribution and redshift
 	To filter based on the BASS sensitivity map, set 'use_BASS_sens_map' to True
@@ -27,7 +27,14 @@ def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,dat
 	
 	#generate random redshifts
 	if use_BASS_sens_map is True:
-		n_rand = int(round(n*len(data)*1.2))
+		if survey is None:
+			survey='70'
+			print('Using sensitivity maps for 70 month survey')
+		if survey=='70':
+			multiple = 1.2
+		elif survey=='105':
+			multiple = 1.1
+		n_rand = int(round(n * len(data) * multiple))
 	else: n_rand = int(round(n*len(data)))
 	z_grid = np.linspace(min(z_arr), max(z_arr), 1000)
 	kde = weighted_gaussian_kde(z_arr, bw_method=width, weights=None)
@@ -54,7 +61,7 @@ def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,dat
 		if 'flux' not in data.dtype.names:
 			print('no flux data in catalog found to filter based on sensitivity')
 		else: 
-			rcat = BASS_sensitivity_filter(data_path + 'sensitivity_maps/',data,rcat)
+			rcat = BASS_sensitivity_filter(data_path + 'sensitivity_maps/',data,rcat,survey)
 
 	randoms=rcat
 	rcdists = np.array([cosmo.comoving_distance(z).value for z in randoms['z']])*cosmo.h
@@ -69,7 +76,7 @@ def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,dat
 	return randoms
 
 
-def BASS_sensitivity_filter(path,data,rcat):
+def BASS_sensitivity_filter(path,data,rcat,survey):
 
 	flux_arr = data['flux']
 	n_rand = len(rcat)
@@ -83,7 +90,7 @@ def BASS_sensitivity_filter(path,data,rcat):
 
 	rcat = append_fields(rcat, 'flux', fluxr_arr)
 
-	smaps,wcses=get_BASSsmap(path)
+	smaps,wcses=get_BASSsmap(path, survey)
 	
 	#filter based on sensitivity
 	good=[]
@@ -104,22 +111,30 @@ def BASS_sensitivity_filter(path,data,rcat):
 	return randoms
 
 
-def get_BASSsmap(direc):
+def get_BASSsmap(direc, survey='70'):
 	'''Enter Galactic coordinates'''
-	from astropy.wcs import WCS
-	w0 = WCS(direc + 'swiftbat_bkgstd_70month4_c0_tot_crab.fits')
-	w1 = WCS(direc + 'swiftbat_bkgstd_70month4_c1_tot_crab.fits')
-	w2 = WCS(direc + 'swiftbat_bkgstd_70month4_c2_tot_crab.fits')
-	w3 = WCS(direc + 'swiftbat_bkgstd_70month4_c3_tot_crab.fits')
-	w4 = WCS(direc + 'swiftbat_bkgstd_70month4_c4_tot_crab.fits')
-	w5 = WCS(direc + 'swiftbat_bkgstd_70month4_c5_tot_crab.fits')
 
-	h0 = fits.open(direc + 'swiftbat_bkgstd_70month4_c0_tot_crab.fits')
-	h1 = fits.open(direc + 'swiftbat_bkgstd_70month4_c1_tot_crab.fits')
-	h2 = fits.open(direc + 'swiftbat_bkgstd_70month4_c2_tot_crab.fits')
-	h3 = fits.open(direc + 'swiftbat_bkgstd_70month4_c3_tot_crab.fits')
-	h4 = fits.open(direc + 'swiftbat_bkgstd_70month4_c4_tot_crab.fits')
-	h5 = fits.open(direc + 'swiftbat_bkgstd_70month4_c5_tot_crab.fits')
+	if survey == '70':
+		sname = 'std_70month4'
+	elif survey =='105':
+		sname = 'var_104month20'
+	else:
+		print('survey paramter needs to be set at 70 or 105')
+
+	from astropy.wcs import WCS
+	w0 = WCS(direc + 'swiftbat_bkg' + sname + '_c0_tot_crab.fits')
+	w1 = WCS(direc + 'swiftbat_bkg' + sname + '_c1_tot_crab.fits')
+	w2 = WCS(direc + 'swiftbat_bkg' + sname + '_c2_tot_crab.fits')
+	w3 = WCS(direc + 'swiftbat_bkg' + sname + '_c3_tot_crab.fits')
+	w4 = WCS(direc + 'swiftbat_bkg' + sname + '_c4_tot_crab.fits')
+	w5 = WCS(direc + 'swiftbat_bkg' + sname + '_c5_tot_crab.fits')
+
+	h0 = fits.open(direc + 'swiftbat_bkg'+ sname +'_c0_tot_crab.fits')
+	h1 = fits.open(direc + 'swiftbat_bkg'+ sname +'_c1_tot_crab.fits')
+	h2 = fits.open(direc + 'swiftbat_bkg'+ sname +'_c2_tot_crab.fits')
+	h3 = fits.open(direc + 'swiftbat_bkg'+ sname +'_c3_tot_crab.fits')
+	h4 = fits.open(direc + 'swiftbat_bkg'+ sname +'_c4_tot_crab.fits')
+	h5 = fits.open(direc + 'swiftbat_bkg'+ sname +'_c5_tot_crab.fits')
 	s0 = h0[0].data
 	s1 = h1[0].data
 	s2 = h2[0].data
