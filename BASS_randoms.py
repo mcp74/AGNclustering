@@ -22,8 +22,6 @@ def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,dat
 	
 	'''
 	z_arr = data['z']
-	l_arr = data['l']
-	b_arr = data['b']
 	
 	#generate random redshifts
 	if use_BASS_sens_map is True:
