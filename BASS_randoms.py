@@ -8,13 +8,14 @@ from numpy.lib.recfunctions import append_fields
 from astropy import units as u
 from astropy.io import fits
 from astropy.coordinates import SkyCoord, match_coordinates_sky
+from scipy import interpolate
 from os.path import expanduser
 
 from clustering.kde import weighted_gaussian_kde
 
 
 
-def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,data_path='/Users/meredithpowell/Dropbox/Data/BASS/',plot=True,plot_filename=None,survey=None):
+def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,data_path='/Users/meredithpowell/Dropbox/Data/BASS/',plot=True,plot_filename=None,survey=None,use_lognlogs=True):
 	'''
 	generates random catalog with random sky distribution and redshift
 	To filter based on the BASS sensitivity map, set 'use_BASS_sens_map' to True
@@ -22,7 +23,7 @@ def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,dat
 	
 	'''
 	z_arr = data['z']
-	
+
 	#generate random redshifts
 	if use_BASS_sens_map is True:
 		if survey is None:
@@ -32,6 +33,8 @@ def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,dat
 			multiple = 1.2
 		elif survey=='105':
 			multiple = 1.1
+		if use_lognlogs is True:
+			multiple *= 5.4
 		n_rand = int(round(n * len(data) * multiple))
 	else: n_rand = int(round(n*len(data)))
 	z_grid = np.linspace(min(z_arr), max(z_arr), 1000)
@@ -59,7 +62,7 @@ def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,dat
 		if 'flux' not in data.dtype.names:
 			print('no flux data in catalog found to filter based on sensitivity')
 		else: 
-			rcat = BASS_sensitivity_filter(data_path + 'sensitivity_maps/',data,rcat,survey)
+			rcat = BASS_sensitivity_filter(data_path,data,rcat,survey,use_lognlogs)
 
 	randoms=rcat
 	rcdists = np.array([cosmo.comoving_distance(z).value for z in randoms['z']])*cosmo.h
@@ -74,21 +77,28 @@ def genrand(data,n,cosmo,width=.2,scoords='galactic',use_BASS_sens_map=False,dat
 	return randoms
 
 
-def BASS_sensitivity_filter(path,data,rcat,survey):
+def BASS_sensitivity_filter(path,data,rcat,survey,use_lognlogs=True):
 
 	flux_arr = data['flux']
 	n_rand = len(rcat)
 
 	#generate random fluxes
 	log_flux_grid = np.linspace(min(np.log10(flux_arr)), max(np.log10(flux_arr)), 1000)
-	kde = weighted_gaussian_kde(np.log10(flux_arr), weights=None)
-	kdepdff=kde.evaluate(log_flux_grid)
+
+	if use_lognlogs is True:
+		lognlogs=get_lognlogs(path)
+		kdepdff = 10**lognlogs(log_flux_grid)/np.sum(10**lognlogs(log_flux_grid))		
+
+	else:
+		kde = weighted_gaussian_kde(np.log10(flux_arr), bw_method=0.1, weights=None)
+		kdepdff=kde.evaluate(log_flux_grid)
+
 	log_fluxr_arr = generate_rand_from_pdf(pdf=kdepdff, num=n_rand, x_grid=log_flux_grid)
 	fluxr_arr = 10**(log_fluxr_arr)
 
 	rcat = append_fields(rcat, 'flux', fluxr_arr)
 
-	smaps,wcses=get_BASSsmap(path, survey)
+	smaps,wcses=get_BASSsmap(path+'sensitivity_maps/', survey)
 	
 	#filter based on sensitivity
 	good=[]
@@ -107,6 +117,16 @@ def BASS_sensitivity_filter(path,data,rcat,survey):
 	randoms=rcat[good.astype(int)]
 	
 	return randoms
+
+def get_lognlogs(path):
+	cat=np.genfromtxt(path + 'Swift_BAT_70mo_logNlogS.dat')
+	S = cat[:,0]
+	N = cat[:,1]
+	Snew = np.append(S,1e-12) #extrapolation to low fluxes
+	Nnew = np.append(N,.35)
+	#fN = interpolate.interp1d(np.log10(Snew),Nnew)
+	log_fN = interpolate.interp1d(np.log10(Snew),np.log10(Nnew))
+	return log_fN
 
 
 def get_BASSsmap(direc, survey='70'):
