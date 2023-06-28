@@ -15,20 +15,20 @@ from Corrfunc.mocks import DDrppi_mocks
 def auto_jackknife(d,r,m,pimax,bins,estimator,covariance=True,survey=None):
 	#print('beginning jackknifes')
 	if survey=='BASS':
-		dblocks=_BASS_block(d,m)
-		rblocks=_BASS_block(r,m)
+		dblocks=np.array(_BASS_block(d,m),dtype=object)
+		rblocks=np.array(_BASS_block(r,m),dtype=object)
 	elif survey=='S82X':
-		dblocks=_S82X_block(d,m)
-		rblocks=_S82X_block(r,m)
+		dblocks=np.array(_S82X_block(d,m),dtype=object)
+		rblocks=np.array(_S82X_block(r,m),dtype=object)
 	elif survey=='AO13':
-		dblocks=_AO13_block(d,m)
-		rblocks=_AO13_block(r,m)
+		dblocks=np.array(_AO13_block(d,m),dtype=object)
+		rblocks=np.array(_AO13_block(r,m),dtype=object)
 	elif survey=='XXL':
-		dblocks=_XXL_block(d,m)
-		rblocks=_XXL_block(r,m)
+		dblocks=np.array(_XXL_block(d,m),dtype=object)
+		rblocks=np.array(_XXL_block(r,m),dtype=object)
 	elif survey=='Comb':
-		dblocks=_Comb_block(d,m)
-		rblocks=_Comb_block(r,m)
+		dblocks=np.array(_Comb_block(d,m),dtype=object)
+		rblocks=np.array(_Comb_block(r,m),dtype=object)
 	else:
 		print('No valid survey for error estimation')
 		return
@@ -63,25 +63,25 @@ def auto_jackknife(d,r,m,pimax,bins,estimator,covariance=True,survey=None):
 def cross_jackknife(d1,d2,r1,r2,m,pimax,bins,estimator,covariance=True,survey=None,weights1=None,weights2=None):
 	#print('beginning jackknifes')
 	if survey=='BASS':
-		d1blocks=_BASS_block(d1,m)
-		d2blocks=_BASS_block(d2,m)
-		r1blocks=_BASS_block(r1,m)
-		r2blocks=_BASS_block(r2,m)
+		d1blocks=np.array(_BASS_block(d1,m),dtype=object)
+		d2blocks=np.array(_BASS_block(d2,m),dtype=object)
+		r1blocks=np.array(_BASS_block(r1,m),dtype=object)
+		r2blocks=np.array(_BASS_block(r2,m),dtype=object)
 	elif survey=='S82X':
-		d1blocks=_S82X_block(d1,m)
-		d2blocks=_S82X_block(d2,m)
-		r1blocks=_S82X_block(r1,m)
-		r2blocks=_S82X_block(r2,m)
+		d1blocks=np.array(_S82X_block(d1,m),dtype=object)
+		d2blocks=np.array(_S82X_block(d2,m),dtype=object)
+		r1blocks=np.array(_S82X_block(r1,m),dtype=object)
+		r2blocks=np.array(_S82X_block(r2,m),dtype=object)
 	elif survey=='AO13':
-		d1blocks=_AO13_block(d1,m)
-		d2blocks=_AO13_block(d2,m)
-		r1blocks=_AO13_block(r1,m)
-		r2blocks=_AO13_block(r2,m)
+		d1blocks=np.array(_AO13_block(d1,m),dtype=object)
+		d2blocks=np.array(_AO13_block(d2,m),dtype=object)
+		r1blocks=np.array(_AO13_block(r1,m),dtype=object)
+		r2blocks=np.array(_AO13_block(r2,m),dtype=object)
 	elif survey=='Comb':
-		d1blocks=_Comb_block(d1,m)
-		d2blocks=_Comb_block(d2,m)
-		r1blocks=_Comb_block(r1,m)
-		r2blocks=_Comb_block(r2,m)
+		d1blocks=np.array(_Comb_block(d1,m),dtype=object)
+		d2blocks=np.array(_Comb_block(d2,m),dtype=object)
+		r1blocks=np.array(_Comb_block(r1,m),dtype=object)
+		r2blocks=np.array(_Comb_block(r2,m),dtype=object)
 	else:
 		print('No valid survey for error estimation')
 		return
