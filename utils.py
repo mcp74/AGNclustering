@@ -8,6 +8,7 @@ import sys
 
 #import genrand
 from Corrfunc.mocks import DDrppi_mocks
+from AGNclustering.zp_utils import *
 
 
 def pair_count(rpbins,pimax,ra1,dec1,cd1,ra2=None,dec2=None,cd2=None,nthreads=4):
@@ -175,7 +176,6 @@ def sum_pi(xi,rpbins):
 
 	return wp
 
-
 def wp_dd(data, randoms, bins, pimax, estimator='L',weights=None):
 
 	if 'weight' in data.dtype.names:
@@ -245,9 +245,13 @@ def wp_d1d2(d1, d2, r2, bins, pimax, r1=None, estimator='L',weights1=None,weight
 		xit = weighted_cross_xi(np.sum(weights1),np.sum(weights2),nr1,nr2,bins,d1d2,d1r2,d2r1,r1r2,estimator=estimator)
 	else:
 		xit = cross_xi(nd1,nd2,nr1,nr2,bins,d1d2,d1r2,d2r1,r1r2,estimator=estimator)
-	wp = sum_pi(xit,bins)
 
-	return wp
+	wp = sum_pi(xit,bins)
+    
+#     Calling the new sum rp function in zp_utils
+	zp = sum_rp(xit)
+    
+	return wp,zp
 
 def z_to_cdist(data,cosmo=None):
 	if cosmo is None:

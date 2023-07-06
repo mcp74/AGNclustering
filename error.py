@@ -9,7 +9,7 @@ from astropy import units as u
 import sys
 from joblib import Parallel, delayed
 
-from clustering.utils import *
+from AGNclustering.utils import *
 from Corrfunc.mocks import DDrppi_mocks
 
 def auto_jackknife(d,r,m,pimax,bins,estimator,covariance=True,survey=None):
@@ -106,7 +106,7 @@ def cross_jackknife(d1,d2,r1,r2,m,pimax,bins,estimator,covariance=True,survey=No
 		else:
 			r1set=None
 		r2set = np.concatenate(new_r2blocks)
-		wp_t = wp_d1d2(d1=d1set, d2=d2set, r1=r1set, r2=r2set, bins=bins, pimax=pimax, estimator=estimator)
+		wp_t,zp = wp_d1d2(d1=d1set, d2=d2set, r1=r1set, r2=r2set, bins=bins, pimax=pimax, estimator=estimator)
 		wp_arr=np.vstack((wp_arr,wp_t))
 	wp_arr=wp_arr[1:]
 
