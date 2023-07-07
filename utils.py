@@ -8,7 +8,7 @@ import sys
 
 #import genrand
 from Corrfunc.mocks import DDrppi_mocks
-from AGNclustering.zp_utils import *
+from AGNclustering.wppi_utils import *
 
 
 def pair_count(rpbins,pimax,ra1,dec1,cd1,ra2=None,dec2=None,cd2=None,nthreads=4):
@@ -248,10 +248,8 @@ def wp_d1d2(d1, d2, r2, bins, pimax, r1=None, estimator='L',weights1=None,weight
 
 	wp = sum_pi(xit,bins)
     
-#     Calling the new sum rp function in zp_utils
-	zp = sum_rp(xit)
     
-	return wp,zp
+	return wp
 
 def z_to_cdist(data,cosmo=None):
 	if cosmo is None:
