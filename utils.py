@@ -8,7 +8,6 @@ import sys
 
 #import genrand
 from Corrfunc.mocks import DDrppi_mocks
-from AGNclustering.wppi_utils import *
 
 
 def pair_count(rpbins,pimax,ra1,dec1,cd1,ra2=None,dec2=None,cd2=None,nthreads=4):

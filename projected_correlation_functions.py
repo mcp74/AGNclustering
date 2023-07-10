@@ -95,7 +95,7 @@ def cross_wp(d1, d2, r2, bins, pimax, m, r1=None, estimator='L',cosmo=None,surve
 	wp = wp_d1d2(d1=d1, d2=d2, r2=r2, bins=bins, pimax=pimax, r1=r1, estimator=estimator)
 	wp_err,cov=cross_jackknife(d1=d1,d2=d2,r1=r1,r2=r2,m=m,pimax=pimax,bins=bins,estimator=estimator,survey=survey)
 
-	return rp,wp,wp_err,cov,zp
+	return rp,wp,wp_err,cov
 
 
 
