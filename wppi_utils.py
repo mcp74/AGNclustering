@@ -17,7 +17,7 @@ def sum_rp(xi,bins,pibins):
 	for i in range(len(bins)-1):     
 		for j in range(len(pibins)):
 			wppi[j] = wppi[j] + 2.0*xi[j+k]
-		k+=6
+		k+=len(pibins)
 	return wppi
 
 def wppi_auto_xi(nd,nr,bins,pibins,pimax,dd,dr,rr=None,estimator='L'):

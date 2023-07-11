@@ -8,8 +8,6 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 import sys
 
-from AGNclustering.utils import *
-from AGNclustering.error import *
 from AGNclustering.wppi_error import *
 from AGNclustering.wppi_utils import *
 from Corrfunc.mocks import DDrppi_mocks
@@ -54,9 +52,9 @@ def auto_wppi(data, randoms, bins, pibins, pimax, m, estimator='L',cosmo=None,su
 		print('Found weights. Will output weighted correlation function')
 
 	wppi = wppi_dd(data=data, randoms=randoms, bins=bins, pibins=pibins, pimax=pimax, estimator=estimator)
-# 	wp_err,cov=auto_jackknife(d=data,r=randoms,m=m,pimax=pimax,bins=bins,estimator=estimator,survey=survey)
+	wppi_err,cov=wppi_auto_jackknife(d=data,r=randoms,m=m,pimax=pimax,bins=bins,pibins=pibins,estimator=estimator,survey=survey)
 
-	return pi, wppi
+	return pi, wppi, wppi_err, cov
 def cross_wppi(d1, d2, r2, bins, pibins, pimax, m, r1=None, estimator='L',cosmo=None,survey='BASS'):
 	'''
 	Computes the projected crosscorrelation function between two catalogs of data with associated random catalogs.
@@ -106,6 +104,6 @@ def cross_wppi(d1, d2, r2, bins, pibins, pimax, m, r1=None, estimator='L',cosmo=
 		print('Found weights. Will output weighted correlation function')
 
 	wppi = wppi_d1d2(d1=d1, d2=d2, r2=r2, bins=bins, pimax=pimax, pibins=pibins, r1=r1, estimator=estimator)
-# 	wp_err,cov=cross_jackknife(d1=d1,d2=d2,r1=r1,r2=r2,m=m,pimax=pimax,bins=bins,estimator=estimator,survey=survey)
+	wppi_err,cov=wppi_cross_jackknife(d1=d1,d2=d2,r1=r1,r2=r2,m=m,pimax=pimax,bins=bins,pibins=pibins,estimator=estimator,survey=survey)
 
-	return pi, wppi
+	return pi, wppi, wppi_err, cov
