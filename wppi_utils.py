@@ -5,6 +5,7 @@ from astropy.cosmology import FlatLambdaCDM
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 import sys
+import math
 
 #import genrand
 from Corrfunc.mocks import DDrppi_mocks
@@ -78,7 +79,7 @@ def wppi_cross_xi(nd1,nd2,nr1,nr2,bins,pibins,pimax,d1d2,d1r2,d2r1=None,r1r2=Non
 # Define length of pi bins
 	npibins = len(pibins)
 #     Loop through data and fill in rebinned npair column
-	for j in range(len(bins)-1):
+	for j in range(nbins):
 		for i in range(len(pibins)):
 			if i==0:
 				d1d2temp[0+(npibins*j)] = np.sum(d1d2['npairs'][0+j*pimax:pibins[0]+j*pimax])
@@ -96,11 +97,6 @@ def wppi_cross_xi(nd1,nd2,nr1,nr2,bins,pibins,pimax,d1d2,d1r2,d2r1=None,r1r2=Non
 #     Redefine D1D2 and D1R2array-like or list of colors or color, option
 	D1D2 = d1d2temp/(nd1*nd2)
 	D1R2 = d1r2temp/(nd1*nr2)
-    
-
-# 	D1D2 = d1d2['npairs']/(nd1*nd2)
-# 	D1R2 = d1r2['npairs']/(nd1*nr2)
-    
 
 	#RR = rr['npairs']/(nr*(nr-1.))
 
@@ -199,3 +195,44 @@ def wppi_d1d2(d1, d2, r2, bins, pimax, pibins, r1=None, estimator='L',weights1=N
 	wppi = sum_rp(xit,bins,pibins)
     
 	return wppi
+
+def ratio_error(d1,d2,d1err,d2err):
+	if len(d1)!=len(d2):
+		sys.exit("Error arrays different lengths")
+	ratio_error = np.zeros(len(d1))
+	for i in range(len(d1)):
+		ratio_error[i]=math.sqrt((d1err[i]/d1[i])**2+(d2err[i]/d2[i])**2)
+	return ratio_error
+
+    
+def control_z(agn,zbins,percentile):
+	lowmass=np.empty(0, dtype=agn.dtype)
+	highmass=np.empty(0,dtype=agn.dtype)
+	midmass=np.empty(0,dtype=agn.dtype)
+	for i in range(len(zbins)-1):
+		zbin=((agn[((agn['z']<zbins[i+1]) & (agn['z']>=zbins[i]))]))
+		for j in range(len(zbin)):
+			if zbin['Mbh'][j]<np.percentile(zbin['Mbh'],percentile):
+				lowmass=np.append(lowmass,zbin[j])
+			elif zbin['Mbh'][j]>np.percentile(zbin['Mbh'],(100-percentile)):
+				highmass=np.append(highmass,zbin[j])
+			else:
+				midmass=np.append(midmass,zbin[j])
+	return lowmass,midmass,highmass
+
+def control_ms(agn,msbins,percentile):
+	lowmass=np.empty(0, dtype=agn.dtype)
+	highmass=np.empty(0,dtype=agn.dtype)
+	midmass=np.empty(0,dtype=agn.dtype)
+	for i in range(len(msbins)-1):
+		msbin=((agn[((agn['log_Ms']<msbins[i+1]) & (agn['log_Ms']>=msbins[i]))]))
+		for j in range(len(msbin)):
+			if msbin['Mbh'][j]<np.percentile(msbin['Mbh'],percentile):
+				lowmass=np.append(lowmass,msbin[j])
+			elif msbin['Mbh'][j]>np.percentile(msbin['Mbh'],(100-percentile)):
+				highmass=np.append(highmass,msbin[j])
+			else:
+				midmass=np.append(midmass,msbin[j])
+	return lowmass,midmass,highmass
+
+    
