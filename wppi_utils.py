@@ -5,6 +5,7 @@ from astropy.cosmology import FlatLambdaCDM
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 import sys
+import random
 import math
 
 #import genrand
@@ -204,35 +205,90 @@ def ratio_error(d1,d2,d1err,d2err):
 		ratio_error[i]=math.sqrt((d1err[i]/d1[i])**2+(d2err[i]/d2[i])**2)
 	return ratio_error
 
-    
-def control_z(agn,zbins,percentile):
-	lowmass=np.empty(0, dtype=agn.dtype)
-	highmass=np.empty(0,dtype=agn.dtype)
-	midmass=np.empty(0,dtype=agn.dtype)
-	for i in range(len(zbins)-1):
-		zbin=((agn[((agn['z']<zbins[i+1]) & (agn['z']>=zbins[i]))]))
-		for j in range(len(zbin)):
-			if zbin['Mbh'][j]<np.percentile(zbin['Mbh'],percentile):
-				lowmass=np.append(lowmass,zbin[j])
-			elif zbin['Mbh'][j]>np.percentile(zbin['Mbh'],(100-percentile)):
-				highmass=np.append(highmass,zbin[j])
-			else:
-				midmass=np.append(midmass,zbin[j])
-	return lowmass,midmass,highmass
 
-def control_ms(agn,msbins,percentile):
-	lowmass=np.empty(0, dtype=agn.dtype)
-	highmass=np.empty(0,dtype=agn.dtype)
-	midmass=np.empty(0,dtype=agn.dtype)
-	for i in range(len(msbins)-1):
-		msbin=((agn[((agn['log_Ms']<msbins[i+1]) & (agn['log_Ms']>=msbins[i]))]))
-		for j in range(len(msbin)):
-			if msbin['Mbh'][j]<np.percentile(msbin['Mbh'],percentile):
-				lowmass=np.append(lowmass,msbin[j])
-			elif msbin['Mbh'][j]>np.percentile(msbin['Mbh'],(100-percentile)):
-				highmass=np.append(highmass,msbin[j])
+# controls variable with respect to another variable
+def control_var(agn,bins,control,var,percentile,cut=None):
+#   3 subsamples to return
+	lower=np.empty(0, dtype=agn.dtype)
+	mid=np.empty(0,dtype=agn.dtype)
+	upper=np.empty(0,dtype=agn.dtype)
+	for i in range(len(bins)-1):
+		ibin =((agn[((agn[control]<bins[i+1]) & (agn[control]>=bins[i]))]))
+		for j in range(len(ibin)):
+			if cut == None:
+				if ibin[var][j]<np.percentile(ibin[var],percentile):
+					lower=np.append(lower,ibin[j])
+				elif ibin[var][j]>np.percentile(ibin[var],(100-percentile)):
+					upper=np.append(upper,ibin[j])
+				else:
+					mid=np.append(mid,ibin[j])
 			else:
-				midmass=np.append(midmass,msbin[j])
-	return lowmass,midmass,highmass
+				if ibin[var][j]<cut:
+					lower=np.append(lower,ibin[j])
+				else:
+					upper=np.append(upper,ibin[j])
+	return lower,mid,upper
 
-    
+def force_distributionmatch(agnhighmass,agnlowmass,var,bins):
+	low,lowedges=np.histogram(agnlowmass[var], bins=bins)
+	high,highedges=np.histogram(agnhighmass[var], bins=bins)
+	for i in range(len(bins)-1):
+		if low[i]<high[i]:
+			diff=high[i]-low[i]
+			for j in range(diff):
+				tempbool=((agnhighmass[var]>=bins[i]) & (agnhighmass[var]<bins[i+1]))
+				while diff>0:
+					rand=random.randint(0,len(agnhighmass)-1)
+					if ((agnhighmass[var][rand]>=bins[i]) & (agnhighmass[var][rand]<bins[i+1])):
+						agnhighmass=np.delete(agnhighmass, rand)
+						diff-=1
+		else:
+			diff=low[i]-high[i]
+			for j in range(diff):
+				while diff>0:
+					rand=random.randint(0,len(agnlowmass)-1)
+					if ((agnlowmass[var][rand]>=bins[i]) & (agnlowmass[var][rand]<bins[i+1])):
+						agnlowmass=np.delete(agnlowmass, rand)
+						diff-=1
+	return agnhighmass,agnlowmass
+
+def control_mult_var(agn,bins1,bins2,control1,control2,var,percentile):
+	lower=np.empty(0, dtype=agn.dtype)
+	mid=np.empty(0,dtype=agn.dtype)
+	upper=np.empty(0,dtype=agn.dtype)
+	for i in range (len(bins2)-1):
+		for j in range(len(bins1)-1):
+			if j == len(bins1)-2:
+				agntemp1 = agn[((agn[control1]<=bins1[j+1]) & (agn[control1]>=bins1[j]))]
+				agntemp = agntemp1[((agntemp1[control2]>=bins2[i]) & (agntemp1[control2]<bins2[(i+1)]))]
+			elif i == len(bins2)-2:
+				agntemp1 = agn[((agn[control1]<bins1[j+1]) & (agn[control1]>=bins1[j]))]
+				agntemp = agntemp1[((agntemp1[control2]>=bins2[i]) & (agntemp1[control2]<=bins2[(i+1)]))]
+			else:
+				agntemp1 = agn[((agn[control1]<bins1[j+1]) & (agn[control1]>=bins1[j]))]
+				agntemp = agntemp1[((agntemp1[control2]>=bins2[i]) & (agntemp1[control2]<bins2[(i+1)]))]
+			if len(agntemp)==0:
+				pass
+			elif len(agntemp) == 1:
+				if agntemp[var][0] < np.percentile(agn[var],percentile):
+					lower = np.append(lower, agntemp[0])
+				elif agntemp[var][0] > np.percentile(agn[var],100-percentile):
+					upper = np.append(upper, agntemp[0])
+				else:
+					mid = np.append(mid, agntemp[0])
+			elif len(agntemp) == 2:
+				if agntemp[var][0]>agntemp[var][1]:
+					upper = np.append(upper, agntemp[0])
+					lower = np.append(lower, agntemp[1])
+				else:
+					upper = np.append(upper, agntemp[1])
+					lower = np.append(lower, agntemp[0])
+			else:
+				for k in range(len(agntemp)):
+					if agntemp[var][k]<np.percentile(agntemp[var],(percentile)):
+						lower=np.append(lower,agntemp[k])
+					elif agntemp[var][k]>np.percentile(agntemp[var],100-percentile):
+						upper=np.append(upper,agntemp[k])
+					else:
+						mid=np.append(mid,agntemp[k])
+	return upper, mid, lower
