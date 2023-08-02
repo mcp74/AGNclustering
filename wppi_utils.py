@@ -22,6 +22,7 @@ def sum_rp(xi,bins,pibins):
 		k+=len(pibins)
 	return wppi
 
+
 def wppi_auto_xi(nd,nr,bins,pibins,pimax,dd,dr,rr=None,estimator='L'):
 	nb = len(dd)
 	nbins = len(bins)-1
@@ -188,11 +189,11 @@ def wppi_d1d2(d1, d2, r2, bins, pimax, pibins, r1=None, estimator='L',weights1=N
 	if (weights1 is not None) or (weights2 is not None):
 		xit = weighted_cross_xi(np.sum(weights1),np.sum(weights2),nr1,nr2,bins,d1d2,d1r2,d2r1,r1r2,estimator=estimator)
 	else:
-		xit = wppi_cross_xi(nd1,nd2,nr1,nr2,bins,pibins,pimax,d1d2,d1r2,d2r1,r1r2,estimator=estimator)
+		if pimax==1.0:
+			xit=cross_xi(nd1,nd2,nr1,nr2,bins,d1d2,d1r2,d2r1,r1r2,estimator=estimator)
+		else:
+			xit = wppi_cross_xi(nd1,nd2,nr1,nr2,bins,pibins,pimax,d1d2,d1r2,d2r1,r1r2,estimator=estimator)
 
-# 	wp = sum_pi(xit,bins)
-    
-#     Calling the new sum rp function in zp_utils
 	wppi = sum_rp(xit,bins,pibins)
     
 	return wppi
@@ -204,6 +205,54 @@ def ratio_error(d1,d2,d1err,d2err):
 	for i in range(len(d1)):
 		ratio_error[i]=math.sqrt((d1err[i]/d1[i])**2+(d2err[i]/d2[i])**2)
 	return ratio_error
+
+def wpmu_d1d2(d1, d2, r2, sbins, mumax, mubins, r1=None, estimator='L',weights1=None,weights2=None):
+
+	if ('weight' in d1.dtype.names):
+		weights1=d1['weight']
+	if ('weight' in d2.dtype.names):
+		weights2=d2['weight']
+
+	if (weights1 is not None) or (weights2 is not None):
+		if weights1 is None:
+			weights1 = np.ones(len(d1))
+		if weights2 is None:
+			weights2 = np.ones(len(d2))
+		#print(d1['ra'],d1['dec'],d1['cdist'],d2['ra'],d2['dec'],d2['cdist'],weights1,weights2)
+		d1d2 = weighted_pair_count(sbins,mumax,d1['ra'],d1['dec'],d1['cdist'],ra2=d2['ra'],dec2=d2['dec'],cd2=d2['cdist'],weights1=weights1,weights2=weights2)
+		d1r2 = weighted_pair_count(sbins,mumax,d1['ra'],d1['dec'],d1['cdist'],ra2=r2['ra'],dec2=r2['dec'],cd2=r2['cdist'],weights1=weights1,weights2=np.ones(len(r2)))
+
+	else:
+		d1d2 = pair_count(sbins,mumax,d1['ra'],d1['dec'],d1['cdist'],ra2=d2['ra'],dec2=d2['dec'],cd2=d2['cdist'],mubins=mubins)
+		d1r2 = pair_count(sbins,mumax,d1['ra'],d1['dec'],d1['cdist'],ra2=r2['ra'],dec2=r2['dec'],cd2=r2['cdist'],mubins=mubins)
+	
+	if (estimator=='L') or (estimator=='Landy'):
+		if r1 is None:
+			sys.exit('Need random catalog for d1 !')
+		if weights2 is not None:
+			d2r1 = weighted_pair_count(sbins,mumax,d2['ra'],d2['dec'],d2['cdist'],ra2=r1['ra'],dec2=r1['dec'],cd2=r1['cdist'],weights1=weights2,weights2=np.ones(len(r1)))
+			r1r2 = weighted_pair_count(sbins,mumax,r1['ra'],r1['dec'],r1['cdist'],ra2=r2['ra'],dec2=r2['dec'],cd2=r2['cdist'],weights1=np.ones(len(r1)),weights2=np.ones(len(r2)))
+		else:
+			d2r1 = pair_count(sbins,mumax,d2['ra'],d2['dec'],d2['cdist'],ra2=r1['ra'],dec2=r1['dec'],cd2=r1['cdist'],mubins=mubins)
+			r1r2 = pair_count(sbins,mumax,r1['ra'],r1['dec'],r1['cdist'],ra2=r2['ra'],dec2=r2['dec'],cd2=r2['cdist'],mubins=mubins)
+	else: 
+		d2r1 = None
+		r1r2 = None
+
+	nd1 = len(d1)
+	nd2 = len(d2)
+	if r1 is None:
+		nr1=0
+	else: nr1 = len(r1)
+	nr2 = len(r2)
+	if (weights1 is not None) or (weights2 is not None):
+		xit = weighted_cross_xi(np.sum(weights1),np.sum(weights2),nr1,nr2,bins,d1d2,d1r2,d2r1,r1r2,estimator=estimator)
+	else:
+		xit=cross_xi(nd1,nd2,nr1,nr2,sbins,d1d2,d1r2,d2r1,r1r2,estimator=estimator)
+            
+	wpmu=sum_pi(xit,sbins)
+    
+	return wpmu
 
 
 # controls variable with respect to another variable
@@ -291,4 +340,4 @@ def control_mult_var(agn,bins1,bins2,control1,control2,var,percentile):
 						upper=np.append(upper,agntemp[k])
 					else:
 						mid=np.append(mid,agntemp[k])
-	return upper, mid, lower
+	return lower, mid, upper

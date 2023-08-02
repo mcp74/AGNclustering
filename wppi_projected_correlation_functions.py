@@ -107,3 +107,50 @@ def cross_wppi(d1, d2, r2, bins, pibins, pimax, m, r1=None, estimator='L',cosmo=
 	wppi_err,cov=wppi_cross_jackknife(d1=d1,d2=d2,r1=r1,r2=r2,m=m,pimax=pimax,bins=bins,pibins=pibins,estimator=estimator,survey=survey)
 
 	return pi, wppi, wppi_err, cov
+
+
+def cross_wpmu(d1, d2, r2, sbins, mubins, mumax, m, r1=None, estimator='L',cosmo=None,survey='BASS'):
+	'''
+	Computes the projected crosscorrelation function between two catalogs of data with associated random catalogs.
+	Utilizes the pair counter from CorrFunc (https://github.com/manodeep/Corrfunc)
+
+	d1: structured array of first data catalog with columns 'ra', 'dec', and either 'z' (redshift) or 'cdist' (comoving distance). For weights, have a 'weight' column
+	r1: structured array of d1 randoms with columns 'ra', 'dec', and either 'z' (redshift) or 'cdist' (comoving distance). Required for Landy-Szalay estimator.
+	d2: structured array of second data catalog with columns 'ra', 'dec', and either 'z' (redshift) or 'cdist' (comoving distance). For weights, have a 'weight' column
+	r2: structured array of d2 randoms with columns 'ra', 'dec', and either 'z' (redshift) or 'cdist' (comoving distance)
+	bins: array of boundaries defining the bins of scale (perpendicular to the line of sight), in units of Mpc/h
+	pimax: maximum distance along the line of sight defining the projection integral length-scale, in units of Mpc/h
+	m: number of jacknife samples for error estimation
+	estimator: either 'L' or 'Landy' for the Landy-Szalay estimator, or 'P' or 'Peebles' for Peebles estimator. If Landy-Szalay, random catalog for d1 is needed.
+	cosmo: astropy cosmology object, used if no 'cdist' column in catalog arrays. if cosmo=None, and there is no 'cdist' column in data arrays, flat LCDM cosmology is used.
+	survey: 'BASS' or 'S82X', for error estimation
+	'''
+
+	d1 = np.array(d1)
+	d2 = np.array(d2)
+	if (r1 is not None):
+		r1 = np.array(r1)
+	r2 = np.array(r2)
+
+	swidths=[]
+	nbins = len(sbins)-1
+	for i in np.arange(nbins):
+		swidths.append(sbins[i+1] - sbins[i])
+	sp = sbins[1:] - 0.5*np.array(swidths)
+    
+	if 'cdist' not in d1.dtype.names:
+		d1 = z_to_cdist(d1,cosmo)
+	if 'cdist' not in d2.dtype.names:
+		d2 = z_to_cdist(d2,cosmo)
+	if (r1 is not None):
+		if ('cdist' not in r1.dtype.names):
+			r1 = z_to_cdist(r1,cosmo)
+	if 'cdist' not in r2.dtype.names:
+		r2 = z_to_cdist(r2,cosmo)
+	if ('weight' in d1.dtype.names) or ('weight' in d2.dtype.names):
+		print('Found weights. Will output weighted correlation function')
+
+	wpmu = wpmu_d1d2(d1=d1, d2=d2, r2=r2, sbins=sbins, mumax=mumax, mubins=mubins, r1=r1, estimator=estimator)
+	wpmu_err,cov=wpmu_cross_jackknife(d1=d1,d2=d2,r1=r1,r2=r2,m=m,mumax=mumax,sbins=sbins,mubins=mubins,estimator=estimator,survey=survey)
+
+	return sp, wpmu, wpmu_err, cov

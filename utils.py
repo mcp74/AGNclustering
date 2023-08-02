@@ -8,15 +8,14 @@ import sys
 
 #import genrand
 from Corrfunc.mocks import DDrppi_mocks
+# from Corrfunc.mocks import DDsmu_mocks
 
-
-def pair_count(rpbins,pimax,ra1,dec1,cd1,ra2=None,dec2=None,cd2=None,nthreads=4):
+def pair_count(rpbins,pimax,ra1,dec1,cd1,ra2=None,dec2=None,cd2=None,nthreads=4,mubins=None):
 	d1ra = ra1.astype('float64')
 	d1dec = dec1.astype('float64')
 	d1cd = cd1.astype('float64')
-
 	if ra2 is None:
-		nn = DDrppi_mocks(autocorr=1, cosmology=1, nthreads=nthreads, pimax=pimax, binfile=rpbins, RA1=d1ra, DEC1=d1dec,\
+			nn = DDrppi_mocks(autocorr=1, cosmology=1, nthreads=nthreads, pimax=pimax, binfile=rpbins, RA1=d1ra, DEC1=d1dec,\
 						  CZ1=d1cd, is_comoving_dist=True, output_rpavg=True, verbose=True)
 
 	else:
@@ -24,9 +23,17 @@ def pair_count(rpbins,pimax,ra1,dec1,cd1,ra2=None,dec2=None,cd2=None,nthreads=4)
 		d2dec = dec2.astype('float64')
 		d2cd = cd2.astype('float64')
 		nn = DDrppi_mocks(autocorr=0, cosmology=1, nthreads=nthreads, pimax=pimax, binfile=rpbins, RA1=d1ra, DEC1=d1dec, \
-			  CZ1=d1cd, RA2=d2ra, DEC2=d2dec, CZ2=d2cd, is_comoving_dist=True, \
-			  output_rpavg=True, verbose=True)        
-		
+				  CZ1=d1cd, RA2=d2ra, DEC2=d2dec, CZ2=d2cd, is_comoving_dist=True, \
+				  output_rpavg=True, verbose=True)   
+# 		if mubins is not None:
+# 			print('wrong')
+# 			nmu_bins=len(mubins)-1
+# 			nn = DDsmu_mocks(autocorr=0, cosmology=1, nthreads=nthreads, mu_max=pimax, nmu_bins=nmu_bins, binfile=rpbins, RA1=d1ra, DEC1=d1dec, CZ1=d1cd, RA2=d2ra, DEC2=d2dec, CZ2=d2cd, is_comoving_dist=True, output_savg=True, verbose=True)
+# 		else:
+# 			nn = DDrppi_mocks(autocorr=0, cosmology=1, nthreads=nthreads, pimax=pimax, binfile=rpbins, RA1=d1ra, DEC1=d1dec, \
+# 				  CZ1=d1cd, RA2=d2ra, DEC2=d2dec, CZ2=d2cd, is_comoving_dist=True, \
+# 				  output_rpavg=True, verbose=True)        
+			
 	return nn
 
 
