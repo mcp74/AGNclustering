@@ -14,8 +14,6 @@ from itertools import repeat
 import multiprocessing
 from multiprocessing import Pool
 
-from numba import njit, types, jit, prange
-import numba
 from fast_histogram import histogram2d
 
 from AGNclustering.utils import z_to_cdist

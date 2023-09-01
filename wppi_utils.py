@@ -265,7 +265,7 @@ def control_var(agn,bins,control,var,percentile,cut=None):
 		ibin =((agn[((agn[control]<bins[i+1]) & (agn[control]>=bins[i]))]))
 		for j in range(len(ibin)):
 			if cut == None:
-				if ibin[var][j]<np.percentile(ibin[var],percentile):
+				if ibin[var][j]<=np.percentile(ibin[var],percentile):
 					lower=np.append(lower,ibin[j])
 				elif ibin[var][j]>np.percentile(ibin[var],(100-percentile)):
 					upper=np.append(upper,ibin[j])
@@ -321,7 +321,7 @@ def control_mult_var(agn,bins1,bins2,control1,control2,var,percentile):
 			elif len(agntemp) == 1:
 				if agntemp[var][0] < np.percentile(agn[var],percentile):
 					lower = np.append(lower, agntemp[0])
-				elif agntemp[var][0] > np.percentile(agn[var],100-percentile):
+				elif agntemp[var][0] >= np.percentile(agn[var],100-percentile):
 					upper = np.append(upper, agntemp[0])
 				else:
 					mid = np.append(mid, agntemp[0])
@@ -334,10 +334,18 @@ def control_mult_var(agn,bins1,bins2,control1,control2,var,percentile):
 					lower = np.append(lower, agntemp[0])
 			else:
 				for k in range(len(agntemp)):
-					if agntemp[var][k]<np.percentile(agntemp[var],(percentile)):
+					if agntemp[var][k]<=np.percentile(agntemp[var],(percentile)):
 						lower=np.append(lower,agntemp[k])
 					elif agntemp[var][k]>np.percentile(agntemp[var],100-percentile):
 						upper=np.append(upper,agntemp[k])
 					else:
 						mid=np.append(mid,agntemp[k])
 	return lower, mid, upper
+
+def wp_chi_squared(d1,d2,d1cov,d2cov):
+	cov = d1cov+d2cov
+	if d1cov.shape != d2cov.shape:
+		sys.exit("Error: arrays different lengths")
+	diff = d1-d2
+	invcov = np.linalg.inv(cov)
+	return np.sum(np.dot(diff,np.dot(invcov,diff)))
