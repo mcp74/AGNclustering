@@ -12,7 +12,7 @@ from clustering.kde import weighted_gaussian_kde
 from scipy import interpolate
 from os.path import expanduser
 
-from clustering.utils import *
+from AGNclustering.utils import *
 
 
 def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/meredithpowell/Dropbox/Data/stripe82x/',plot=True,plot_filename=None,field='AO13',use_lognlogs=True):

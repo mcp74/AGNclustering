@@ -11,7 +11,7 @@ from astropy.coordinates import SkyCoord, match_coordinates_sky
 from scipy import interpolate
 from os.path import expanduser
 
-from clustering.kde import weighted_gaussian_kde
+from AGNclustering.kde import weighted_gaussian_kde
 
 
 

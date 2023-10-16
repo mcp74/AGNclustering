@@ -9,7 +9,7 @@ from astropy import units as u
 import sys
 from joblib import Parallel, delayed
 
-from clustering.utils import *
+from AGNclustering.utils import *
 from Corrfunc.mocks import DDrppi_mocks
 
 def auto_jackknife(d,r,m,pimax,bins,estimator,covariance=True,survey=None):

@@ -13,8 +13,8 @@ from scipy import interpolate
 from astropy.wcs import WCS
 from os.path import expanduser
 
-from clustering.utils import *
-from clustering.XMM_XXL_utils import *
+from AGNclustering.utils import *
+from AGNclustering.XMM_XXL_utils import *
 
 
 def genrand(data,n,cosmo,width=.2,use_S82X_sens_map=True,data_path='/Users/meredithpowell/Dropbox/Data/XMM-XXL/',plot=True,plot_filename=None,use_lognlogs=True):

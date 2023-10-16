@@ -9,7 +9,7 @@ from scipy import interpolate
 from os.path import expanduser
 
 home = expanduser("~")
-path = home+'/Dropbox/Data/XMM-XXL/'
+path = home+'~/Data/XMM-XXL/'
 #fluxarea=np.genfromtxt(path+'XMM_XXL_tot_af_0.5-10keV.txt', delimiter=',')
 
 

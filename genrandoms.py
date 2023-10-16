@@ -11,7 +11,7 @@ from astropy.coordinates import SkyCoord, match_coordinates_sky
 from kde import weighted_gaussian_kde
 from scipy import interpolate
 
-from clustering.utils import *
+from AGNclustering.utils import *
 
 
 def genrand(data,n,cosmo,width=.2,plot=True,plot_filename=None):

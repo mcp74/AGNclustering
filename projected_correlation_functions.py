@@ -8,8 +8,8 @@ from astropy.coordinates import SkyCoord
 from astropy import units as u
 import sys
 
-from clustering.utils import *
-from clustering.error import *
+from AGNclustering.utils import *
+from AGNclustering.error import *
 from Corrfunc.mocks import DDrppi_mocks
 
 __author__ = "Meredith Powell <meredith.powell@yale.edu>"
