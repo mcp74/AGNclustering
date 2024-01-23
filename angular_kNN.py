@@ -67,6 +67,7 @@ def CDFkNN_theta(thetas, xgal, xrand, kneighbors = 1, nthread = 32, randdown = 1
 	start = time.time()
 
 	dis_theta = get_theta_tree(xgal, xrand, kneighbors)[0]
+# 	print(dis_theta)
 	# print(dis_theta[0].shape)
 
 	print("  kdtree tot", time.time() - start) 
