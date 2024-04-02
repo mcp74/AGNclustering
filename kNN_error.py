@@ -1,11 +1,13 @@
 from __future__ import division
 
 import numpy as np 
+import math
 from numpy.lib.recfunctions import append_fields
 from astropy.table import Table, vstack
 from astropy.cosmology import FlatLambdaCDM
 from astropy.coordinates import SkyCoord
 from astropy import units as u
+import matplotlib.colors as mcolors
 import sys
 from joblib import Parallel, delayed
 
@@ -17,7 +19,7 @@ from AGNclustering.error import _BASS_block, _AO13_block, _S82X_block, _XXL_bloc
 from AGNclustering.KNN_stuff import CDFkNN_rp_pi
 from AGNclustering.angular_kNN import CDFkNN_theta
 
-def angular_kNN_jacknife(d, r, angles, kneighbors, angleslist, m=5, concatenate = False, covariance=True, survey='BASS'):
+def angular_kNN_jacknife(d, r, angles, kneighbors, linear_angle_adjust, m=5, concatenate = False, covariance=True, survey='BASS'):
 	if survey=='BASS':
 		dblocks=np.array(_BASS_block(d,m),dtype=object)
 		rblocks=np.array(_BASS_block(r,m),dtype=object)
@@ -45,8 +47,8 @@ def angular_kNN_jacknife(d, r, angles, kneighbors, angleslist, m=5, concatenate 
 	cdf_arr = np.empty(nrs)
     
 	if(concatenate == True):
-		nrs = 6
-		npis = 6
+		nrs = angles.size
+		npis = angles.size
 		errors = np.empty(nrs)
 		covar = np.zeros(shape = (nrs,nrs))
 		cdf_arr = np.empty(nrs)
@@ -67,24 +69,21 @@ def angular_kNN_jacknife(d, r, angles, kneighbors, angleslist, m=5, concatenate 
 		agn_angles = np.vstack((decg, rag)).T
 		gal_angles = np.vstack((decr, rar)).T
         
-		cdf_t = CDFkNN_theta(angles, gal_angles, agn_angles, kneighbors)
-		for j in range(kneighbors):
+		cdf_t = np.zeros((len(kneighbors),len(angles)))
+		for i,j in zip(kneighbors-1,np.arange(len(kneighbors))):         
+			cdf_t[j] = CDFkNN_theta(angles * math.pow(i+1,2/3), gal_angles, agn_angles, kneighbors[-1])[i]
+        
+		for j in range(len(kneighbors)):
 			n=cdf_t[j]  
-# 			if (concatenate == True):
-# 				n = n[angleslist[j]]
 			cdf_arr=np.vstack((cdf_arr,n))
 	cdf_arr=cdf_arr[1:]
 
-	for i in range(kneighbors):
-		cdf_a=cdf_arr[i::kneighbors]
+	for i in range(len(kneighbors)):
+		cdf_a=cdf_arr[i::len(kneighbors)]
 		errs = np.sqrt(((M-1.)/M) * np.sum( (cdf_a - np.average(cdf_a,axis=0))**2, axis=0))
-# 		errs = (np.std(cdf_a,axis=0))
 		errors = np.vstack((errors,errs))
    
 	errors=errors[1:]
-                
-	#PARALLELIZED JACKKNIFE COMPUTATION:
-	#wp_arr = np.array(Parallel(n_jobs=-1)(delayed(PAjackknife)(i,dblocks,rblocks,pimax=pimax,bins=bins,estimator=estimator) for i in np.arange(M)))
 
 	c=np.empty((nrs-2,nrs-2))
 	if concatenate == False:
@@ -106,17 +105,17 @@ def angular_kNN_jacknife(d, r, angles, kneighbors, angleslist, m=5, concatenate 
 		else: return errors
 
 	else:
-		for a in range(kneighbors):
-			cdf_temp=cdf_arr[a::kneighbors]
+		for a in range(len(kneighbors)):
+			cdf_temp=cdf_arr[a::len(kneighbors)]
 			cdf_temp=np.delete(cdf_temp,-1,axis=1)
 			cdf_temp=np.delete(cdf_temp,0,axis=1)
 			if a == 0:
 				cdf_a = cdf_temp
 			else:
 				cdf_a = np.concatenate((cdf_a,cdf_temp),axis=1)
-		cov = np.zeros(shape = ((nrs-2)*kneighbors,(nrs-2)*kneighbors))
-		for i in np.arange((nrs-2)*kneighbors):
-			for j in np.arange((nrs-2)*kneighbors):
+		cov = np.zeros(shape = ((nrs-2)*len(kneighbors),(nrs-2)*len(kneighbors)))
+		for i in np.arange((nrs-2)*len(kneighbors)):
+			for j in np.arange((nrs-2)*len(kneighbors)):
 				cov[i,j] = ((M-1.)/M)* np.sum( (cdf_a[:,i] - np.average(cdf_a,axis=0)[i]) * (cdf_a[:,j] - np.average(cdf_a,axis=0)[j]), axis=0)
             
 		return errors,cov
@@ -360,13 +359,14 @@ def kNN_chi_squared(d1,d2,d1cov,d2cov,single_neighbor=False,concatenate=False):
 			chi_list = np.append(chi_list,np.sum(np.dot(diff,np.dot(invcov,diff))))         
 		return chi_list
 	else:
-		invcov = np.linalg.inv(cov)
-		diff = (d1-d2).flatten()
-		count = 0
-		for i in range(len(cov)):
-			for j in range(len(cov)):
-				count += np.sum(np.dot(diff[j],np.dot(invcov[i][j],diff[i])))
-		return count
+		try:
+        # Compute the inverse of the combined covariance matrix
+			invcov = np.linalg.inv(cov)
+		except np.linalg.LinAlgError:
+			sys.exit("Error: Covariance matrix is singular and cannot be inverted")
+		diff = (d1 - d2).flatten()
+		chi_squared = np.dot(diff.T, np.dot(invcov, diff))
+		return chi_squared           
 
 def chop_cdf(rs,pis,high,low,errhigh,errlow,cov_high,cov_low,ind):
 	inrangehigh = ((high[ind]>=0.1) & (high[ind]<=0.9))
@@ -441,7 +441,11 @@ def angular_chop_cdf(angles,high,low,errhigh,errlow,cov_high,cov_low):
         
 	return anglesnew, highnew, lownew, errhighnew, errlownew, cov_highnew, cov_lownew
     
-    
+
+def generate_distinct_colors(n):
+	HSV_tuples = [(x*1.0/n, 0.5, 0.8) for x in range(n)]  # Saturation and Value fixed
+	RGB_tuples = map(lambda x: mcolors.hsv_to_rgb(x), HSV_tuples)
+	return list(RGB_tuples)
     
     
     
