@@ -11,18 +11,20 @@ from Corrfunc.mocks import DDrppi_mocks
 
 
 def pair_count(rpbins,pimax,ra1,dec1,cd1,ra2=None,dec2=None,cd2=None,nthreads=4):
-	d1ra = ra1.astype('float64')
-	d1dec = dec1.astype('float64')
-	d1cd = cd1.astype('float64')
+	d1ra = np.float64(ra1)
+	d1dec = np.float64(dec1)
+	d1cd = np.float64(cd1)
+	
 
 	if ra2 is None:
 		nn = DDrppi_mocks(autocorr=1, cosmology=1, nthreads=nthreads, pimax=pimax, binfile=rpbins, RA1=d1ra, DEC1=d1dec,\
 						  CZ1=d1cd, is_comoving_dist=True, output_rpavg=True, verbose=True)
 
 	else:
-		d2ra = ra2.astype('float64')
-		d2dec = dec2.astype('float64')
-		d2cd = cd2.astype('float64')
+		d2ra = np.float64(ra2)
+		d2dec = np.float64(dec2)
+		d2cd = np.float64(cd2)
+
 		nn = DDrppi_mocks(autocorr=0, cosmology=1, nthreads=nthreads, pimax=pimax, binfile=rpbins, RA1=d1ra, DEC1=d1dec, \
 			  CZ1=d1cd, RA2=d2ra, DEC2=d2dec, CZ2=d2cd, is_comoving_dist=True, \
 			  output_rpavg=True, verbose=True)        
@@ -31,18 +33,21 @@ def pair_count(rpbins,pimax,ra1,dec1,cd1,ra2=None,dec2=None,cd2=None,nthreads=4)
 
 
 def weighted_pair_count(rpbins,pimax,ra1,dec1,cd1,weights1,weights2=None,ra2=None,dec2=None,cd2=None,nthreads=4):
-	d1ra = ra1.astype('float64')
-	d1dec = dec1.astype('float64')
-	d1cd = cd1.astype('float64')
+
+	d1ra = np.float64(ra1)
+	d1dec = np.float64(dec1)
+	d1cd = np.float64(cd1)
+	
 
 	if ra2 is None:
 		nn = DDrppi_mocks(autocorr=1, cosmology=1, nthreads=nthreads, pimax=pimax, binfile=rpbins, RA1=d1ra, DEC1=d1dec,\
 						  CZ1=d1cd, weights1=weights1, is_comoving_dist=True, output_rpavg=True, verbose=True, weight_type='pair_product')
 
 	else:
-		d2ra = ra2.astype('float64')
-		d2dec = dec2.astype('float64')
-		d2cd = cd2.astype('float64')
+		d2ra = np.float64(ra2)
+		d2dec = np.float64(dec2)
+		d2cd = np.float64(cd2)
+
 		nn = DDrppi_mocks(autocorr=0, cosmology=1, nthreads=nthreads, pimax=pimax, binfile=rpbins, RA1=d1ra, DEC1=d1dec, \
 			  CZ1=d1cd, weights1=weights1, RA2=d2ra, DEC2=d2dec, CZ2=d2cd, weights2=weights2, is_comoving_dist=True, \
 			  output_rpavg=True, verbose=True, weight_type='pair_product')        
