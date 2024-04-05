@@ -15,7 +15,7 @@ from Corrfunc.mocks import DDrppi_mocks
 __author__ = "Meredith Powell <meredith.powell@yale.edu>"
 
 
-def auto_wp(data, randoms, bins, pimax, m, estimator='L',cosmo=None,survey='BASS'):
+def auto_wp(data, randoms, bins, pimax, m, estimator='L',cosmo=None,survey=None):
 	'''
 	Computes the projected autocorrelation function a catalog of data with an associated random catalog
 	Utilizes the pair counter from CorrFunc (https://github.com/manodeep/Corrfunc)
@@ -51,7 +51,7 @@ def auto_wp(data, randoms, bins, pimax, m, estimator='L',cosmo=None,survey='BASS
 	return rp,wp,wp_err,cov
 
 
-def cross_wp(d1, d2, r2, bins, pimax, m, r1=None, estimator='L',cosmo=None,survey='BASS'):
+def cross_wp(d1, d2, r2, bins, pimax, m, r1=None, estimator='L',cosmo=None,survey=None):
 	'''
 	Computes the projected crosscorrelation function between two catalogs of data with associated random catalogs.
 	Utilizes the pair counter from CorrFunc (https://github.com/manodeep/Corrfunc)
